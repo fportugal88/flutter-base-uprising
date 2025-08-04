@@ -43,9 +43,9 @@ export function AppLayout({ children }: AppLayoutProps) {
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">C</span>
+                <span className="text-white font-bold text-sm">F</span>
               </div>
-              <span className="text-headline-small font-semibold text-gray-900">CorpApp</span>
+              <span className="text-headline-small font-semibold text-gray-900">Fusion Data Bridge</span>
             </div>
           </div>
           

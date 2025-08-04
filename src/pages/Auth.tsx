@@ -97,7 +97,7 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Data Bridge</CardTitle>
+          <CardTitle className="text-2xl">Fusion Data Bridge</CardTitle>
           <CardDescription>
             Faça login ou crie sua conta para acessar o assistente de dados
           </CardDescription>
