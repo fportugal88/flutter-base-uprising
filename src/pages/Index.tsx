@@ -5,20 +5,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Search, ArrowUp, Calendar, Plus, FileText, CalendarClock, Heart, MessageCircle, MoreHorizontal, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
-  useEffect(() => {
-    const isAuthenticated = localStorage.getItem('isAuthenticated');
-    if (!isAuthenticated) {
-      navigate('/login');
+  const getUserName = () => {
+    if (user?.user_metadata?.display_name) {
+      return user.user_metadata.display_name;
     }
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    navigate('/login');
+    if (user?.email) {
+      return user.email.split('@')[0];
+    }
+    return 'Usuário';
   };
 
   return (
@@ -28,15 +28,17 @@ const Index = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground mb-1">
-              Bom dia, Lucas
+              Bom dia, {getUserName()}
             </h1>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={handleLogout}>
+            <Button variant="ghost" size="sm" onClick={signOut}>
               <LogOut className="w-4 h-4" />
             </Button>
             <Avatar className="w-10 h-10">
-              <AvatarFallback>L</AvatarFallback>
+              <AvatarFallback>
+                {user?.email?.charAt(0).toUpperCase() || 'U'}
+              </AvatarFallback>
             </Avatar>
           </div>
         </div>
