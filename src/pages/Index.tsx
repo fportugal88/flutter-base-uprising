@@ -30,16 +30,6 @@ const Index = () => {
             </h1>
             <p className="text-muted-foreground">Bem-vindo ao painel da empresa</p>
           </div>
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={signOut}>
-              <LogOut className="w-4 h-4" />
-            </Button>
-            <Avatar className="w-10 h-10">
-              <AvatarFallback>
-                {user?.email?.charAt(0).toUpperCase() || 'U'}
-              </AvatarFallback>
-            </Avatar>
-          </div>
         </div>
 
         {/* Stats Cards */}

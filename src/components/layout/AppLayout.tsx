@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
+import { NotificationDropdown } from './NotificationDropdown';
+import { UserDropdown } from './UserDropdown';
 
 const sidebarItems = [
   { title: 'Home', url: '/', icon: Home },
@@ -91,21 +93,8 @@ export function AppLayout({ children }: AppLayoutProps) {
             </div>
             
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" className="relative">
-                <Bell className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-uber-green rounded-full"></span>
-              </Button>
-              
-              <div className="flex items-center gap-3">
-                <Avatar className="w-8 h-8">
-                  <AvatarImage src="/placeholder.svg" />
-                  <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                </Avatar>
-                <div className="hidden md:block">
-                  <p className="text-sm font-medium text-gray-900">{getUserName()}</p>
-                  <p className="text-xs text-gray-500">Usuário</p>
-                </div>
-              </div>
+              <NotificationDropdown />
+              <UserDropdown />
             </div>
           </header>
 
