@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Send, ArrowLeft, Check, Database, Clock, Tag } from "lucide-react";
+import { MessageCircle, Send, ArrowLeft, Check, Database, Clock, Tag, ExternalLink, AlertCircle, FileText, Eye, Edit3, X } from "lucide-react";
 
 interface Message {
   id: string;
@@ -13,6 +13,8 @@ interface Message {
   timestamp: Date;
   quickReplies?: string[];
   suggestions?: DataSuggestion[];
+  richCard?: RichCard;
+  reviewCard?: ReviewCard;
   loading?: boolean;
 }
 
@@ -21,16 +23,53 @@ interface DataSuggestion {
   lastUpdate: string;
   platform: string;
   tags: string[];
+  description?: string;
+  similarityScore?: number;
+}
+
+interface RichCard {
+  type: 'table' | 'dashboard';
+  title: string;
+  description: string;
+  link: string;
+  lastUsed?: string;
+  usedBy?: string;
+}
+
+interface ReviewCard {
+  requestSummary: {
+    metric: string;
+    filters: string[];
+    frequency: string;
+    privacy: string;
+    purpose: string;
+  };
+  estimatedDelivery: string;
+  priority: string;
+}
+
+interface RequestData {
+  objective: string;
+  dataType: string;
+  timePeriod: string;
+  frequency: string;
+  privacy: string;
+  businessCase: string;
+  requestId: string;
 }
 
 type ConversationStep = 
   | 'welcome' 
   | 'initial' 
-  | 'context' 
-  | 'data-type' 
-  | 'time-period' 
-  | 'suggestions' 
-  | 'confirmation';
+  | 'intention_detection'
+  | 'context_enrichment'
+  | 'frequency_selection'
+  | 'privacy_check'
+  | 'business_case'
+  | 'asset_suggestions' 
+  | 'review_request'
+  | 'confirmation'
+  | 'follow_up';
 
 const DataAssistant = () => {
   const navigate = useNavigate();
@@ -38,15 +77,71 @@ const DataAssistant = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [requestData, setRequestData] = useState({
+  const [requestData, setRequestData] = useState<RequestData>({
     objective: '',
     dataType: '',
     timePeriod: '',
+    frequency: '',
+    privacy: '',
+    businessCase: '',
     requestId: ''
   });
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Mock data catalog for suggestions
+  const mockDataCatalog: DataSuggestion[] = [
+    {
+      name: 'clientes_ticket_regional',
+      lastUpdate: '2025-01-15',
+      platform: 'Databricks',
+      tags: ['Clientes', 'Vendas', 'Regional'],
+      description: 'Ticket médio de clientes por região com dados dos últimos 12 meses',
+      similarityScore: 0.95
+    },
+    {
+      name: 'comportamento_compra_regiao',
+      lastUpdate: '2025-01-10',
+      platform: 'BigQuery',
+      tags: ['Comportamento', 'Regional', 'Analytics'],
+      description: 'Dashboard analítico sobre padrões de compra regionais',
+      similarityScore: 0.87
+    },
+    {
+      name: 'clientes_inativos_base',
+      lastUpdate: '2025-01-20',
+      platform: 'Snowflake',
+      tags: ['Clientes', 'Churn', 'CRM'],
+      description: 'Base consolidada de clientes inativos com análise de motivos',
+      similarityScore: 0.82
+    }
+  ];
+
+  // Function placeholder for AI integration
+  const callAIFunction = async (message: string, context: any) => {
+    // TODO: Integrar com serviço de IA
+    // Esta função será substituída pela integração real com IA Generativa
+    console.log('AI Input:', { message, context, currentStep });
+    
+    // Mock response baseado no contexto
+    if (currentStep === 'intention_detection') {
+      return {
+        intent: 'create_request',
+        entities: {
+          metric: 'ticket médio',
+          dimension: 'região',
+          timeframe: 'últimos 6 meses'
+        },
+        confidence: 0.95
+      };
+    }
+    
+    return {
+      response: 'Entendi sua solicitação. Vou ajudar você com isso.',
+      nextStep: 'context_enrichment'
+    };
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -78,8 +173,8 @@ const DataAssistant = () => {
     simulateTyping(() => {
       addMessage({
         type: 'assistant',
-        content: 'Oi! Eu posso te ajudar a solicitar dados, consultar se algo já existe ou tirar dúvidas.',
-        quickReplies: ['Solicitar dados', 'Consultar catálogo', 'Tenho uma dúvida']
+        content: 'Olá! Me diga com o que você precisa de ajuda. Posso verificar se já temos algum dado pronto ou te ajudar a montar um pedido novo.',
+        quickReplies: ['🔍 Buscar dado existente', '🧾 Criar novo pedido', '❓ Tirar dúvida']
       });
     });
   };
@@ -90,107 +185,164 @@ const DataAssistant = () => {
       content: reply
     });
 
-    if (reply === 'Solicitar dados') {
-      setCurrentStep('context');
+    if (reply.includes('Criar novo pedido')) {
+      setCurrentStep('intention_detection');
       simulateTyping(() => {
         addMessage({
           type: 'assistant',
-          content: 'Legal! Qual é o objetivo dessa solicitação? (ex: relatório, campanha, decisão...)',
-          quickReplies: ['Campanha de CRM', 'Análise de Vendas', 'Painel Executivo', 'Outro']
+          content: 'Perfeito! Agora me conte: qual tipo de informação você precisa? Pode ser bem específico.',
+          quickReplies: ['Ticket médio por região', 'Base de clientes inativos', 'Abandono de carrinho', 'Outro - vou digitar']
         });
       });
-    } else if (reply === 'Consultar catálogo') {
+    } else if (reply.includes('Buscar dado existente')) {
+      setCurrentStep('asset_suggestions');
       simulateTyping(() => {
+        const suggestions = mockDataCatalog.slice(0, 2);
         addMessage({
           type: 'assistant',
-          content: 'Vou te mostrar nosso catálogo de dados disponíveis. O que você está procurando?'
+          content: 'Aqui estão alguns dados populares do nosso catálogo. O que você está procurando?',
+          suggestions
         });
-      });
-    } else if (reply === 'Tenho uma dúvida') {
+      }, 1000);
+    } else if (reply.includes('Tirar dúvida')) {
       simulateTyping(() => {
         addMessage({
           type: 'assistant',
-          content: 'Claro! Qual é sua dúvida? Estou aqui para ajudar.'
+          content: 'Claro! Qual é sua dúvida? Posso te ajudar com:\n\n• Como solicitar dados\n• Status de solicitações\n• Acesso a tabelas\n• Políticas de dados\n\nO que você gostaria de saber?'
         });
       });
     }
   };
 
-  const handleContextSubmit = (context: string) => {
-    setRequestData(prev => ({ ...prev, objective: context }));
-    addMessage({
-      type: 'user',
-      content: context
-    });
-
-    setCurrentStep('data-type');
+  const handleIntentionDetection = async (intention: string) => {
+    setRequestData(prev => ({ ...prev, objective: intention }));
+    
+    // Call AI function to detect entities and intent
+    const aiResponse = await callAIFunction(intention, { step: 'intention_detection' });
+    
+    setCurrentStep('context_enrichment');
     simulateTyping(() => {
       addMessage({
         type: 'assistant',
-        content: 'Entendi! Agora selecione o tipo de informação que você precisa.',
-        quickReplies: ['Clientes', 'Transações', 'Produtos', 'Outros']
+        content: `Entendi que você precisa de ${intention.toLowerCase()}. Agora vou fazer algumas perguntas para entender melhor:
+
+Qual granularidade você espera? (por cliente, por região, por pedido...)`,
+        quickReplies: ['Por cliente', 'Por região', 'Por pedido', 'Por produto']
+      });
+    }, 1500);
+  };
+
+  const handleContextEnrichment = (granularity: string) => {
+    setRequestData(prev => ({ ...prev, dataType: granularity }));
+    addMessage({
+      type: 'user',
+      content: granularity
+    });
+
+    setCurrentStep('frequency_selection');
+    simulateTyping(() => {
+      addMessage({
+        type: 'assistant',
+        content: 'Com que frequência você quer esse dado?',
+        quickReplies: ['Uma vez só', 'Semanal', 'Mensal', 'Diário']
       });
     });
   };
 
-  const handleDataTypeSelect = (dataType: string) => {
-    setRequestData(prev => ({ ...prev, dataType }));
+  const handleFrequencySelection = (frequency: string) => {
+    setRequestData(prev => ({ ...prev, frequency }));
     addMessage({
       type: 'user',
-      content: dataType
+      content: frequency
     });
 
-    setCurrentStep('time-period');
+    setCurrentStep('privacy_check');
     simulateTyping(() => {
       addMessage({
         type: 'assistant',
-        content: 'Você precisa de dados de qual período?',
-        quickReplies: ['Últimos 7 dias', 'Últimos 30 dias', 'Escolher intervalo']
+        content: 'Esses dados envolvem informações pessoais (CPF, e-mail, telefone etc.)?',
+        quickReplies: ['Sim, dados pessoais', 'Não, dados agregados', 'Não sei']
       });
     });
   };
 
-  const handleTimePeriodSelect = (period: string) => {
-    setRequestData(prev => ({ ...prev, timePeriod: period }));
+  const handlePrivacyCheck = (privacy: string) => {
+    setRequestData(prev => ({ ...prev, privacy }));
     addMessage({
       type: 'user',
-      content: period
+      content: privacy
     });
 
-    setCurrentStep('suggestions');
+    setCurrentStep('business_case');
     simulateTyping(() => {
-      const suggestion: DataSuggestion = {
-        name: 'transacoes_crm_ultimos_30_dias',
-        lastUpdate: '02/08/2025',
-        platform: 'Databricks',
-        tags: ['Clientes', 'CRM', 'Atualizado']
-      };
-
       addMessage({
         type: 'assistant',
-        content: 'Acho que encontrei algo parecido com o que você precisa.',
-        suggestions: [suggestion]
+        content: 'Para finalizar, há algum dashboard ou relatório que você já usa com parte dessa informação?',
+        quickReplies: ['Sim, já uso algo similar', 'Não, é novo', 'Não sei']
       });
+    });
+  };
+
+  const handleBusinessCase = (businessCase: string) => {
+    setRequestData(prev => ({ ...prev, businessCase }));
+    addMessage({
+      type: 'user',
+      content: businessCase
+    });
+
+    setCurrentStep('asset_suggestions');
+    simulateTyping(() => {
+      // Find relevant suggestions based on request data
+      const relevantSuggestions = mockDataCatalog.filter(item => 
+        item.tags.some(tag => 
+          requestData.objective.toLowerCase().includes(tag.toLowerCase()) ||
+          requestData.dataType.toLowerCase().includes(tag.toLowerCase())
+        )
+      ).slice(0, 2);
+
+      if (relevantSuggestions.length > 0) {
+        addMessage({
+          type: 'assistant',
+          content: 'Encontrei alguns dados similares no nosso catálogo:',
+          suggestions: relevantSuggestions,
+          richCard: {
+            type: 'dashboard',
+            title: 'Comportamento de Compra por Região',
+            description: 'Dashboard executivo com métricas de vendas regionais',
+            link: '#dashboard-link',
+            lastUsed: '3 dias atrás',
+            usedBy: 'Equipe de CRM'
+          }
+        });
+      } else {
+        handleCreateNewRequest();
+      }
     }, 2000);
   };
 
-  const handleUseSuggestion = () => {
+  const handleUseSuggestion = (suggestion: DataSuggestion) => {
     addMessage({
       type: 'user',
-      content: 'Usar essa tabela'
+      content: `Usar a tabela: ${suggestion.name}`
     });
 
     setCurrentStep('confirmation');
-    const requestId = '#' + Math.floor(Math.random() * 10000);
+    const requestId = '#DADOS-' + Math.floor(Math.random() * 10000);
     setRequestData(prev => ({ ...prev, requestId }));
 
     simulateTyping(() => {
       addMessage({
         type: 'assistant',
-        content: `Sua solicitação foi registrada com sucesso! O time de dados vai analisar e você poderá acompanhar o status em 'Minhas Solicitações'.
+        content: `Perfeito! Você terá acesso à tabela ${suggestion.name}.
 
-ID da solicitação: ${requestId}
-SLA estimado: até 3 dias úteis`
+🎯 **Acesso liberado em**: 1 dia útil
+📧 **Notificação**: Você receberá um e-mail com instruções
+📊 **Plataforma**: ${suggestion.platform}
+
+**Protocolo**: ${requestId}
+
+Posso te avisar quando estiver pronto?`,
+        quickReplies: ['Sim, me avise', 'Não precisa']
       });
     });
   };
@@ -201,25 +353,70 @@ SLA estimado: até 3 dias úteis`
       content: 'Não é isso que eu preciso'
     });
 
+    handleCreateNewRequest();
+  };
+
+  const handleCreateNewRequest = () => {
+    setCurrentStep('review_request');
+    simulateTyping(() => {
+      const reviewCard: ReviewCard = {
+        requestSummary: {
+          metric: requestData.objective,
+          filters: [requestData.dataType, requestData.timePeriod],
+          frequency: requestData.frequency,
+          privacy: requestData.privacy,
+          purpose: requestData.businessCase
+        },
+        estimatedDelivery: '3 dias úteis',
+        priority: 'Normal'
+      };
+
+      addMessage({
+        type: 'assistant',
+        content: 'Com base no que conversamos, aqui está um resumo da sua solicitação:',
+        reviewCard
+      });
+    });
+  };
+
+  const handleConfirmRequest = () => {
+    addMessage({
+      type: 'user',
+      content: 'Confirmar pedido'
+    });
+
+    setCurrentStep('confirmation');
+    const requestId = '#DADOS-' + Math.floor(Math.random() * 10000);
+    setRequestData(prev => ({ ...prev, requestId }));
+
     simulateTyping(() => {
       addMessage({
         type: 'assistant',
-        content: 'Sem problema! Vou registrar sua solicitação personalizada para o time de dados analisar.'
-      });
-      
-      const requestId = '#' + Math.floor(Math.random() * 10000);
-      setRequestData(prev => ({ ...prev, requestId }));
-      setCurrentStep('confirmation');
-      
-      setTimeout(() => {
-        addMessage({
-          type: 'assistant',
-          content: `Solicitação registrada com sucesso!
+        content: `Pedido criado com sucesso! 
 
-ID da solicitação: ${requestId}
-SLA estimado: até 3 dias úteis`
-        });
-      }, 1000);
+**Protocolo**: ${requestId}
+⏱️ **SLA estimado**: até 3 dias úteis
+📬 **Atualizações**: Você receberá por aqui
+
+Posso te avisar quando estiver pronto?`,
+        quickReplies: ['Sim, me avise', 'Ver minhas solicitações']
+      });
+    });
+  };
+
+  const handleEditRequest = () => {
+    addMessage({
+      type: 'user',
+      content: 'Editar campos'
+    });
+
+    setCurrentStep('intention_detection');
+    simulateTyping(() => {
+      addMessage({
+        type: 'assistant',
+        content: 'Sem problema! Vamos revisar. O que você gostaria de alterar?',
+        quickReplies: ['Mudar métrica', 'Alterar período', 'Outras especificações']
+      });
     });
   };
 
@@ -229,22 +426,73 @@ SLA estimado: até 3 dias úteis`
     const message = inputValue.trim();
     setInputValue('');
 
-    if (currentStep === 'context') {
-      handleContextSubmit(message);
-    } else {
-      addMessage({
-        type: 'user',
-        content: message
-      });
+    addMessage({
+      type: 'user',
+      content: message
+    });
 
-      // Placeholder para integração futura com IA
-      // TODO: Chamar função de IA aqui
-      // const aiResponse = await callAIFunction(message);
-      
+    // Route message based on current step
+    if (currentStep === 'intention_detection') {
+      handleIntentionDetection(message);
+    } else if (currentStep === 'follow_up') {
+      handleFollowUp(message);
+    } else {
+      // General AI integration for free-form conversation
+      simulateTyping(async () => {
+        try {
+          const aiResponse = await callAIFunction(message, { 
+            currentStep, 
+            requestData,
+            messageHistory: messages 
+          });
+          
+          addMessage({
+            type: 'assistant',
+            content: aiResponse.response || 'Entendi! Como posso ajudar você com isso?'
+          });
+        } catch (error) {
+          addMessage({
+            type: 'assistant',
+            content: 'Desculpe, houve um problema. Pode reformular sua pergunta?'
+          });
+        }
+      });
+    }
+  };
+
+  const handleFollowUp = async (message: string) => {
+    const lowerMessage = message.toLowerCase();
+    
+    if (lowerMessage.includes('status') || lowerMessage.includes('pedido')) {
       simulateTyping(() => {
         addMessage({
           type: 'assistant',
-          content: 'Interessante! Como posso ajudar você com isso?' // Será substituído pela resposta da IA
+          content: `Aqui estão suas solicitações:
+
+🟡 **#DADOS-${Math.floor(Math.random() * 1000)}** - Em desenvolvimento
+📊 Ticket médio por região
+⏱️ Estimativa: 2 dias úteis
+
+🟢 **#DADOS-${Math.floor(Math.random() * 1000)}** - Concluído
+📈 Base de clientes inativos
+✅ Disponível para acesso`
+        });
+      });
+    } else if (lowerMessage.includes('cancelar')) {
+      simulateTyping(() => {
+        addMessage({
+          type: 'assistant',
+          content: 'Qual solicitação você gostaria de cancelar? Me informe o número do protocolo.',
+          quickReplies: ['#DADOS-1234', '#DADOS-5678', 'Listar todas']
+        });
+      });
+    } else {
+      // Default AI response
+      const aiResponse = await callAIFunction(message, { step: 'follow_up' });
+      simulateTyping(() => {
+        addMessage({
+          type: 'assistant',
+          content: aiResponse.response || 'Como posso ajudar você hoje?'
         });
       });
     }
@@ -323,14 +571,37 @@ SLA estimado: até 3 dias úteis`
                           size="sm"
                           className="mr-2 mb-2"
                           onClick={() => {
+                            addMessage({ type: 'user', content: reply });
+                            
                             if (currentStep === 'initial') {
                               handleQuickReply(reply);
-                            } else if (currentStep === 'context') {
-                              handleContextSubmit(reply);
-                            } else if (currentStep === 'data-type') {
-                              handleDataTypeSelect(reply);
-                            } else if (currentStep === 'time-period') {
-                              handleTimePeriodSelect(reply);
+                            } else if (currentStep === 'intention_detection' && reply !== 'Outro - vou digitar') {
+                              handleIntentionDetection(reply);
+                            } else if (currentStep === 'context_enrichment') {
+                              handleContextEnrichment(reply);
+                            } else if (currentStep === 'frequency_selection') {
+                              handleFrequencySelection(reply);
+                            } else if (currentStep === 'privacy_check') {
+                              handlePrivacyCheck(reply);
+                            } else if (currentStep === 'business_case') {
+                              handleBusinessCase(reply);
+                            } else if (currentStep === 'confirmation') {
+                              if (reply.includes('me avise')) {
+                                setCurrentStep('follow_up');
+                                simulateTyping(() => {
+                                  addMessage({
+                                    type: 'assistant',
+                                    content: 'Perfeito! Te aviso assim que estiver pronto. Precisa de mais alguma coisa?'
+                                  });
+                                });
+                              } else if (reply.includes('solicitações')) {
+                                simulateTyping(() => {
+                                  addMessage({
+                                    type: 'assistant',
+                                    content: 'Aqui você pode acompanhar todas suas solicitações em tempo real.'
+                                  });
+                                });
+                              }
                             }
                           }}
                         >
@@ -342,7 +613,7 @@ SLA estimado: até 3 dias úteis`
 
                   {/* Data Suggestions */}
                   {message.suggestions && (
-                    <div className="mt-3">
+                    <div className="mt-3 space-y-3">
                       {message.suggestions.map((suggestion, index) => (
                         <Card key={index} className="border-border">
                           <CardContent className="p-4">
@@ -353,6 +624,11 @@ SLA estimado: até 3 dias úteis`
                                   <h4 className="text-label-large text-foreground font-mono">
                                     {suggestion.name}
                                   </h4>
+                                  {suggestion.description && (
+                                    <p className="text-body-small text-muted-foreground mt-1">
+                                      {suggestion.description}
+                                    </p>
+                                  )}
                                   <div className="flex items-center text-body-medium text-muted-foreground mt-1">
                                     <Clock className="h-4 w-4 mr-1" />
                                     Última atualização: {suggestion.lastUpdate}
@@ -360,6 +636,13 @@ SLA estimado: até 3 dias úteis`
                                   <p className="text-body-medium text-muted-foreground">
                                     Disponível em: {suggestion.platform}
                                   </p>
+                                  {suggestion.similarityScore && (
+                                    <div className="flex items-center mt-1">
+                                      <Badge variant="outline" className="text-xs">
+                                        {(suggestion.similarityScore * 100).toFixed(0)}% de similaridade
+                                      </Badge>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>
@@ -376,9 +659,10 @@ SLA estimado: até 3 dias úteis`
                             <div className="flex gap-2">
                               <Button 
                                 size="sm" 
-                                onClick={handleUseSuggestion}
+                                onClick={() => handleUseSuggestion(suggestion)}
                                 className="flex-1"
                               >
+                                <Check className="h-4 w-4 mr-1" />
                                 Usar essa tabela
                               </Button>
                               <Button 
@@ -387,12 +671,102 @@ SLA estimado: até 3 dias úteis`
                                 onClick={handleRejectSuggestion}
                                 className="flex-1"
                               >
-                                Não é isso que eu preciso
+                                <X className="h-4 w-4 mr-1" />
+                                Não é isso
                               </Button>
                             </div>
                           </CardContent>
                         </Card>
                       ))}
+                    </div>
+                  )}
+
+                  {/* Rich Card for dashboards/tables */}
+                  {message.richCard && (
+                    <div className="mt-3">
+                      <Card className="border-accent/20 bg-accent/5">
+                        <CardHeader className="pb-3">
+                          <div className="flex items-center">
+                            {message.richCard.type === 'dashboard' ? (
+                              <FileText className="h-5 w-5 text-accent mr-2" />
+                            ) : (
+                              <Database className="h-5 w-5 text-accent mr-2" />
+                            )}
+                            <CardTitle className="text-label-large">
+                              {message.richCard.title}
+                            </CardTitle>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <p className="text-body-small text-muted-foreground mb-3">
+                            {message.richCard.description}
+                          </p>
+                          {message.richCard.lastUsed && (
+                            <p className="text-body-small text-muted-foreground mb-3">
+                              <strong>Último uso:</strong> {message.richCard.lastUsed} • {message.richCard.usedBy}
+                            </p>
+                          )}
+                          <div className="flex gap-2">
+                            <Button size="sm" variant="outline">
+                              <ExternalLink className="h-4 w-4 mr-1" />
+                              Ver {message.richCard.type === 'dashboard' ? 'Dashboard' : 'Tabela'}
+                            </Button>
+                            <Button size="sm" variant="outline">
+                              <Eye className="h-4 w-4 mr-1" />
+                              Pré-visualizar
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+
+                  {/* Review Card */}
+                  {message.reviewCard && (
+                    <div className="mt-3">
+                      <Card className="border-primary/20 bg-primary/5">
+                        <CardHeader>
+                          <CardTitle className="text-label-large flex items-center">
+                            <FileText className="h-5 w-5 text-primary mr-2" />
+                            Resumo da Solicitação
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div>
+                              <span className="text-body-small font-medium text-foreground">📊 Métrica:</span>
+                              <span className="text-body-small text-muted-foreground ml-2">{message.reviewCard.requestSummary.metric}</span>
+                            </div>
+                            <div>
+                              <span className="text-body-small font-medium text-foreground">🎯 Filtros:</span>
+                              <span className="text-body-small text-muted-foreground ml-2">{message.reviewCard.requestSummary.filters.join(', ')}</span>
+                            </div>
+                            <div>
+                              <span className="text-body-small font-medium text-foreground">🔄 Frequência:</span>
+                              <span className="text-body-small text-muted-foreground ml-2">{message.reviewCard.requestSummary.frequency}</span>
+                            </div>
+                            <div>
+                              <span className="text-body-small font-medium text-foreground">🛡️ Privacidade:</span>
+                              <span className="text-body-small text-muted-foreground ml-2">{message.reviewCard.requestSummary.privacy}</span>
+                            </div>
+                            <div>
+                              <span className="text-body-small font-medium text-foreground">⏱️ Estimativa:</span>
+                              <span className="text-body-small text-muted-foreground ml-2">{message.reviewCard.estimatedDelivery}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex gap-2 mt-4">
+                            <Button size="sm" onClick={handleConfirmRequest} className="flex-1">
+                              <Check className="h-4 w-4 mr-1" />
+                              Confirmar Pedido
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={handleEditRequest}>
+                              <Edit3 className="h-4 w-4 mr-1" />
+                              Editar
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
                     </div>
                   )}
                 </CardContent>
@@ -423,16 +797,31 @@ SLA estimado: até 3 dias úteis`
         )}
 
         {/* Success State */}
-        {currentStep === 'confirmation' && (
+        {currentStep === 'confirmation' && messages.length > 0 && !messages[messages.length - 1].quickReplies && (
           <div className="flex justify-center">
             <Card className="bg-accent/10 border-accent/20">
               <CardContent className="p-6 text-center">
                 <div className="mx-auto w-12 h-12 bg-accent rounded-full flex items-center justify-center mb-4">
                   <Check className="h-6 w-6 text-accent-foreground" />
                 </div>
-                <Button variant="outline" className="mt-4">
-                  Ver minhas solicitações
-                </Button>
+                <h3 className="text-label-large text-foreground mb-2">Solicitação Criada!</h3>
+                <p className="text-body-small text-muted-foreground mb-4">
+                  Você pode acompanhar o progresso em tempo real
+                </p>
+                <div className="flex gap-2 justify-center">
+                  <Button variant="outline" size="sm">
+                    Ver minhas solicitações
+                  </Button>
+                  <Button size="sm" onClick={() => {
+                    setCurrentStep('follow_up');
+                    addMessage({
+                      type: 'assistant',
+                      content: 'Precisa de mais alguma coisa? Posso ajudar com outras solicitações ou esclarecer dúvidas.'
+                    });
+                  }}>
+                    Nova solicitação
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -449,14 +838,18 @@ SLA estimado: até 3 dias úteis`
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Digite aqui sua pergunta..."
+            placeholder={
+              currentStep === 'intention_detection' 
+                ? "Descreva que tipo de dado você precisa..." 
+                : "Digite aqui sua pergunta..."
+            }
             className="flex-1"
-            disabled={currentStep === 'confirmation'}
+            disabled={isTyping}
           />
           <Button 
             onClick={handleSendMessage}
             size="icon"
-            disabled={!inputValue.trim() || currentStep === 'confirmation'}
+            disabled={!inputValue.trim() || isTyping}
           >
             <Send className="h-4 w-4" />
           </Button>
