@@ -1,6 +1,6 @@
 import React from 'react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { Home, Users, CheckSquare, MessageCircle, TrendingUp, User, Bell, Search } from 'lucide-react';
+import { Home, BarChart3, Bell, Search } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,11 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const sidebarItems = [
   { title: 'Home', url: '/', icon: Home },
-  { title: 'Rede Social', url: '/social', icon: Users },
-  { title: 'Aprovações', url: '/approvals', icon: CheckSquare },
-  { title: 'Mensagens', url: '/messages', icon: MessageCircle },
-  { title: 'Carreira', url: '/career', icon: TrendingUp },
-  { title: 'Perfil', url: '/profile', icon: User },
+  { title: 'Assistente de Dados', url: '/data-assistant', icon: BarChart3 },
 ];
 
 interface AppLayoutProps {
