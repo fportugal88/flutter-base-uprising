@@ -79,6 +79,13 @@ const Index = () => {
       <div className="px-6 mb-6">
         <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
         <div className="space-y-3">
+          <Button 
+            className="w-full justify-start h-12 text-left"
+            onClick={() => navigate('/data-assistant')}
+          >
+            <MessageCircle className="w-4 h-4 mr-3" />
+            Assistente de Dados
+          </Button>
           <Button variant="outline" className="w-full justify-start h-12 text-left">
             <Plus className="w-4 h-4 mr-3" />
             New Post
