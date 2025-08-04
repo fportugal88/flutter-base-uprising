@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import DataAssistant from "./pages/DataAssistant";
+import MyRequests from "./pages/MyRequests";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -34,6 +35,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <DataAssistant />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/my-requests" 
+              element={
+                <ProtectedRoute>
+                  <MyRequests />
                 </ProtectedRoute>
               } 
             />

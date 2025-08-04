@@ -180,11 +180,6 @@ const DataAssistant = () => {
   };
 
   const handleQuickReply = (reply: string) => {
-    addMessage({
-      type: 'user',
-      content: reply
-    });
-
     if (reply.includes('Criar novo pedido')) {
       setCurrentStep('intention_detection');
       simulateTyping(() => {
@@ -234,10 +229,6 @@ Qual granularidade você espera? (por cliente, por região, por pedido...)`,
 
   const handleContextEnrichment = (granularity: string) => {
     setRequestData(prev => ({ ...prev, dataType: granularity }));
-    addMessage({
-      type: 'user',
-      content: granularity
-    });
 
     setCurrentStep('frequency_selection');
     simulateTyping(() => {
@@ -251,10 +242,6 @@ Qual granularidade você espera? (por cliente, por região, por pedido...)`,
 
   const handleFrequencySelection = (frequency: string) => {
     setRequestData(prev => ({ ...prev, frequency }));
-    addMessage({
-      type: 'user',
-      content: frequency
-    });
 
     setCurrentStep('privacy_check');
     simulateTyping(() => {
@@ -268,10 +255,6 @@ Qual granularidade você espera? (por cliente, por região, por pedido...)`,
 
   const handlePrivacyCheck = (privacy: string) => {
     setRequestData(prev => ({ ...prev, privacy }));
-    addMessage({
-      type: 'user',
-      content: privacy
-    });
 
     setCurrentStep('business_case');
     simulateTyping(() => {
@@ -285,10 +268,6 @@ Qual granularidade você espera? (por cliente, por região, por pedido...)`,
 
   const handleBusinessCase = (businessCase: string) => {
     setRequestData(prev => ({ ...prev, businessCase }));
-    addMessage({
-      type: 'user',
-      content: businessCase
-    });
 
     setCurrentStep('asset_suggestions');
     simulateTyping(() => {
@@ -571,21 +550,26 @@ Posso te avisar quando estiver pronto?`,
                           size="sm"
                           className="mr-2 mb-2"
                           onClick={() => {
-                            addMessage({ type: 'user', content: reply });
-                            
                             if (currentStep === 'initial') {
+                              addMessage({ type: 'user', content: reply });
                               handleQuickReply(reply);
                             } else if (currentStep === 'intention_detection' && reply !== 'Outro - vou digitar') {
+                              addMessage({ type: 'user', content: reply });
                               handleIntentionDetection(reply);
                             } else if (currentStep === 'context_enrichment') {
+                              addMessage({ type: 'user', content: reply });
                               handleContextEnrichment(reply);
                             } else if (currentStep === 'frequency_selection') {
+                              addMessage({ type: 'user', content: reply });
                               handleFrequencySelection(reply);
                             } else if (currentStep === 'privacy_check') {
+                              addMessage({ type: 'user', content: reply });
                               handlePrivacyCheck(reply);
                             } else if (currentStep === 'business_case') {
+                              addMessage({ type: 'user', content: reply });
                               handleBusinessCase(reply);
                             } else if (currentStep === 'confirmation') {
+                              addMessage({ type: 'user', content: reply });
                               if (reply.includes('me avise')) {
                                 setCurrentStep('follow_up');
                                 simulateTyping(() => {
@@ -595,12 +579,7 @@ Posso te avisar quando estiver pronto?`,
                                   });
                                 });
                               } else if (reply.includes('solicitações')) {
-                                simulateTyping(() => {
-                                  addMessage({
-                                    type: 'assistant',
-                                    content: 'Aqui você pode acompanhar todas suas solicitações em tempo real.'
-                                  });
-                                });
+                                navigate('/my-requests');
                               }
                             }
                           }}
@@ -809,7 +788,7 @@ Posso te avisar quando estiver pronto?`,
                   Você pode acompanhar o progresso em tempo real
                 </p>
                 <div className="flex gap-2 justify-center">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => navigate('/my-requests')}>
                     Ver minhas solicitações
                   </Button>
                   <Button size="sm" onClick={() => {
