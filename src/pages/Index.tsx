@@ -1,11 +1,26 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, ArrowUp, Calendar, Plus, FileText, CalendarClock, Heart, MessageCircle, MoreHorizontal } from 'lucide-react';
+import { Search, ArrowUp, Calendar, Plus, FileText, CalendarClock, Heart, MessageCircle, MoreHorizontal, LogOut } from 'lucide-react';
 
 const Index = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem('isAuthenticated');
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    navigate('/login');
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -13,12 +28,17 @@ const Index = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground mb-1">
-              Good morning, Lucas
+              Bom dia, Lucas
             </h1>
           </div>
-          <Avatar className="w-10 h-10">
-            <AvatarFallback>L</AvatarFallback>
-          </Avatar>
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={handleLogout}>
+              <LogOut className="w-4 h-4" />
+            </Button>
+            <Avatar className="w-10 h-10">
+              <AvatarFallback>L</AvatarFallback>
+            </Avatar>
+          </div>
         </div>
         
         {/* Search */}
