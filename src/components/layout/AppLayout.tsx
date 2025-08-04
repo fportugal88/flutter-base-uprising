@@ -1,6 +1,6 @@
 import React from 'react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { Home, BarChart3, Bell, Search } from 'lucide-react';
+import { Home, BarChart3, Bell, Search, FileText } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 const sidebarItems = [
   { title: 'Home', url: '/', icon: Home },
   { title: 'Assistente de Dados', url: '/data-assistant', icon: BarChart3 },
+  { title: 'Minhas Solicitações', url: '/my-requests', icon: FileText },
 ];
 
 interface AppLayoutProps {
