@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import DataAssistant from "./pages/DataAssistant";
+import DataAssistantWithSidebar from "./pages/DataAssistantWithSidebar";
 import MyRequests from "./pages/MyRequests";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -34,7 +34,7 @@ const App = () => (
               path="/data-assistant" 
               element={
                 <ProtectedRoute>
-                  <DataAssistant />
+                  <DataAssistantWithSidebar />
                 </ProtectedRoute>
               } 
             />

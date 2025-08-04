@@ -279,7 +279,11 @@ const MyRequests = () => {
                         </Button>
                       )}
                       
-                      <Button variant="outline" size="sm" onClick={() => navigate('/data-assistant')}>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => navigate(`/data-assistant?requestId=${request.id}`)}
+                      >
                         <MessageSquare className="h-4 w-4 mr-1" />
                         Chat
                       </Button>
