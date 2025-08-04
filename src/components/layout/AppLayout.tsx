@@ -5,6 +5,7 @@ import { NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from '@/contexts/AuthContext';
 
 const sidebarItems = [
   { title: 'Home', url: '/', icon: Home },
@@ -17,6 +18,22 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
+  const { user } = useAuth();
+  
+  const getUserInitials = () => {
+    if (user?.user_metadata?.display_name) {
+      return user.user_metadata.display_name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+    if (user?.email) {
+      return user.email.slice(0, 2).toUpperCase();
+    }
+    return 'U';
+  };
+
+  const getUserName = () => {
+    return user?.user_metadata?.display_name || user?.email || 'Usuário';
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -82,11 +99,11 @@ export function AppLayout({ children }: AppLayoutProps) {
               <div className="flex items-center gap-3">
                 <Avatar className="w-8 h-8">
                   <AvatarImage src="/placeholder.svg" />
-                  <AvatarFallback>JD</AvatarFallback>
+                  <AvatarFallback>{getUserInitials()}</AvatarFallback>
                 </Avatar>
                 <div className="hidden md:block">
-                  <p className="text-sm font-medium text-gray-900">João Silva</p>
-                  <p className="text-xs text-gray-500">Desenvolvedor</p>
+                  <p className="text-sm font-medium text-gray-900">{getUserName()}</p>
+                  <p className="text-xs text-gray-500">Usuário</p>
                 </div>
               </div>
             </div>
