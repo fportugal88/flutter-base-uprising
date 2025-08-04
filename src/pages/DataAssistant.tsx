@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,6 +33,7 @@ type ConversationStep =
   | 'confirmation';
 
 const DataAssistant = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<ConversationStep>('welcome');
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -221,7 +223,7 @@ SLA estimado: até 3 dias úteis`
     });
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
     const message = inputValue.trim();
@@ -235,10 +237,14 @@ SLA estimado: até 3 dias úteis`
         content: message
       });
 
+      // Placeholder para integração futura com IA
+      // TODO: Chamar função de IA aqui
+      // const aiResponse = await callAIFunction(message);
+      
       simulateTyping(() => {
         addMessage({
           type: 'assistant',
-          content: 'Interessante! Como posso ajudar você com isso?'
+          content: 'Interessante! Como posso ajudar você com isso?' // Será substituído pela resposta da IA
         });
       });
     }
@@ -255,9 +261,9 @@ SLA estimado: até 3 dias úteis`
       <div className="min-h-screen bg-background flex flex-col">
         {/* Header */}
         <div className="flex items-center p-4 border-b bg-card">
-          <Button variant="ghost" size="icon" className="mr-3">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+        <Button variant="ghost" size="icon" className="mr-3" onClick={() => navigate('/')}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
           <h1 className="text-headline-large text-foreground">Assistente de Dados</h1>
         </div>
 
@@ -288,7 +294,7 @@ SLA estimado: até 3 dias úteis`
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <div className="flex items-center p-4 border-b bg-card">
-        <Button variant="ghost" size="icon" className="mr-3">
+        <Button variant="ghost" size="icon" className="mr-3" onClick={() => navigate('/')}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="text-headline-large text-foreground">Assistente de Dados</h1>
