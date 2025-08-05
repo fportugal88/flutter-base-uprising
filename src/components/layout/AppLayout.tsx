@@ -83,8 +83,8 @@ export function AppLayout({ children }: AppLayoutProps) {
           {/* Header */}
           <header className="h-14 sm:h-16 border-b border-gray-200 bg-white px-3 sm:px-6 flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-4">
-              <SidebarTrigger className="md:hidden p-2" />
-              <div className="hidden sm:block relative">
+              {/* Remove hamburger menu - using bottom nav on mobile */}
+              <div className="hidden md:block relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input 
                   placeholder="Buscar..." 
