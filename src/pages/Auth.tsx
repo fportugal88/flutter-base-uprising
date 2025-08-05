@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, Mail, Lock, User, Apple } from 'lucide-react';
 
@@ -17,7 +18,8 @@ const Auth = () => {
   // Form states
   const [loginData, setLoginData] = useState({
     email: '',
-    password: ''
+    password: '',
+    rememberMe: false
   });
 
   const [signupData, setSignupData] = useState({
@@ -99,7 +101,7 @@ const Auth = () => {
         <CardHeader className="text-center space-y-2 pb-4">
           <CardTitle className="text-xl sm:text-2xl font-bold">Fusion Data Bridge</CardTitle>
           <CardDescription className="text-sm">
-            Faça login ou crie sua conta para acessar o assistente de dados
+            Entre agora para explorar, pedir e descobrir tudo que seus dados podem oferecer.
           </CardDescription>
         </CardHeader>
         <CardContent className="px-4 pb-6">
@@ -192,6 +194,22 @@ const Auth = () => {
                       required
                     />
                   </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="remember-me"
+                    checked={loginData.rememberMe}
+                    onCheckedChange={(checked) => 
+                      setLoginData({ ...loginData, rememberMe: checked as boolean })
+                    }
+                  />
+                  <Label 
+                    htmlFor="remember-me" 
+                    className="text-sm text-muted-foreground cursor-pointer"
+                  >
+                    Lembrar de mim
+                  </Label>
                 </div>
 
                 <Button type="submit" className="w-full h-12 text-base" disabled={isLoading}>
