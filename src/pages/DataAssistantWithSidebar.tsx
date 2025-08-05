@@ -61,7 +61,7 @@ const DataAssistantWithSidebar = () => {
   };
 
   const handleNewChat = async () => {
-    const sessionId = createNewSession('Nova conversa');
+    const sessionId = createNewSession('Nova descoberta');
 
     try {
       const response = await sendChatMessage([
@@ -151,9 +151,9 @@ const DataAssistantWithSidebar = () => {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div className="flex-1">
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Chat Assistant</h1>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Descobrir</h1>
                 <p className="text-sm sm:text-base text-muted-foreground">
-                  Converse com a IA
+                  Transforme perguntas em respostas. Solicite, explore e ganhe tempo com dados inteligentes.
                 </p>
               </div>
             </div>
@@ -163,7 +163,7 @@ const DataAssistantWithSidebar = () => {
               className="w-full sm:w-auto h-12 text-base"
             >
               <MessageCircle className="h-4 w-4 mr-2" />
-              Nova Conversa
+              Nova Descoberta
             </Button>
           </div>
 
@@ -178,9 +178,9 @@ const DataAssistantWithSidebar = () => {
             <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 text-center">
               <div className="mb-6 sm:mb-8">
                 <MessageCircle className="h-12 w-12 sm:h-16 sm:w-16 text-accent mx-auto mb-3 sm:mb-4" />
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">Chat Assistant</h2>
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">Descobrir</h2>
                 <p className="text-sm sm:text-base text-muted-foreground max-w-sm mx-auto">
-                  Converse com a IA sobre qualquer assunto.
+                  Transforme perguntas em respostas. Solicite, explore e ganhe tempo com dados inteligentes.
                 </p>
               </div>
 
@@ -210,7 +210,7 @@ const DataAssistantWithSidebar = () => {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex-1">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Chat Assistant</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Descobrir</h1>
               <p className="text-sm sm:text-base text-muted-foreground">
                 {currentSession.title}
               </p>
@@ -222,7 +222,7 @@ const DataAssistantWithSidebar = () => {
             className="w-full sm:w-auto h-12 text-base"
           >
             <MessageCircle className="h-4 w-4 mr-2" />
-            Nova Conversa
+            Nova Descoberta
           </Button>
         </div>
 

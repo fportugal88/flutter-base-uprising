@@ -50,7 +50,7 @@ export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
     <div className="w-64 lg:w-80 bg-card border-r border-border flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-border">
-        <h3 className="text-sm font-semibold text-foreground">Conversas</h3>
+        <h3 className="text-sm font-semibold text-foreground">Descobertas</h3>
       </div>
 
       {/* Chat List */}
@@ -60,10 +60,10 @@ export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
             <div className="flex flex-col items-center justify-center p-6 text-center">
               <MessageCircle className="w-12 h-12 text-muted-foreground mb-3" />
               <p className="text-sm text-muted-foreground">
-                Nenhuma conversa ainda
+                Nenhuma descoberta ainda
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Inicie uma conversa para ver o histórico aqui
+                Inicie uma descoberta para ver o histórico aqui
               </p>
             </div>
           ) : (
@@ -101,7 +101,7 @@ export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
                             className="text-destructive focus:text-destructive"
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
-                            Excluir conversa
+                            Excluir descoberta
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -129,7 +129,7 @@ export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
       {/* Footer */}
       <div className="p-4 border-t border-border text-center">
         <p className="text-xs text-muted-foreground">
-          {activeSessions.length} conversa{activeSessions.length !== 1 ? 's' : ''}
+          {activeSessions.length} descoberta{activeSessions.length !== 1 ? 's' : ''}
         </p>
       </div>
     </div>
