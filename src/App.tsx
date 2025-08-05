@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import DataAssistantWithSidebar from "./pages/DataAssistantWithSidebar";
 import MyRequests from "./pages/MyRequests";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -38,13 +39,21 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
-            <Route 
-              path="/my-requests" 
+            <Route
+              path="/my-requests"
               element={
                 <ProtectedRoute>
                   <MyRequests />
                 </ProtectedRoute>
-              } 
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

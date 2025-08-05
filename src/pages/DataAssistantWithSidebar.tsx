@@ -9,6 +9,7 @@ import { ChatSidebar } from "@/components/layout/ChatSidebar";
 import { useChat } from "@/contexts/ChatContext";
 import { useRequests } from "@/hooks/useRequests";
 import { sendChatMessage } from "@/lib/llm";
+import type { Message as ChatMessage } from "@/contexts/ChatContext";
 
 interface DataSuggestion {
   name: string;
@@ -77,7 +78,7 @@ const DataAssistantWithSidebar = () => {
     linkSessionToRequest,
     getSessionByRequest 
   } = useChat();
-  const { createRequest } = useRequests();
+  const { createRequest } = useRequests({ autoFetch: false });
   
   const [currentStep, setCurrentStep] = useState<ConversationStep>('welcome');
   const [inputValue, setInputValue] = useState('');
@@ -148,7 +149,7 @@ const DataAssistantWithSidebar = () => {
     scrollToBottom();
   }, [currentSession?.messages]);
 
-  const addMessage = (message: any) => {
+  const addMessage = (message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
     if (currentSession) {
       addMessageToSession(currentSession.id, message);
     }
