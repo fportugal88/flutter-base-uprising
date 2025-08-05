@@ -144,42 +144,42 @@ const MyRequests = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col pb-16 md:pb-0">
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b bg-card">
-        <div className="flex items-center">
-          <Button variant="ghost" size="icon" className="mr-3" onClick={() => navigate('/')}>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-6 border-b bg-card gap-3">
+        <div className="flex items-center w-full sm:w-auto">
+          <Button variant="ghost" size="icon" className="mr-2 sm:mr-3 md:hidden" onClick={() => navigate('/')}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div>
-            <h1 className="text-display-small text-foreground">Minhas Solicitações</h1>
-            <p className="text-body-medium text-muted-foreground">
+          <div className="flex-1">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Minhas Solicitações</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Acompanhe o status de todas suas solicitações de dados
             </p>
           </div>
         </div>
         
-        <Button onClick={() => navigate('/data-assistant')}>
+        <Button onClick={() => navigate('/data-assistant')} className="w-full sm:w-auto h-12 text-base">
           <MessageSquare className="h-4 w-4 mr-2" />
           Nova Solicitação
         </Button>
       </div>
 
       {/* Filters */}
-      <div className="p-6 border-b bg-card">
-        <div className="flex gap-4 items-center">
-          <div className="relative flex-1 max-w-sm">
+      <div className="p-3 sm:p-6 border-b bg-card">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center">
+          <div className="relative flex-1 max-w-full sm:max-w-sm">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar solicitações..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 h-12 text-base"
             />
           </div>
           
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-full sm:w-48 h-12">
               <Filter className="h-4 w-4 mr-2" />
               <SelectValue placeholder="Filtrar por status" />
             </SelectTrigger>
@@ -195,7 +195,7 @@ const MyRequests = () => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-3 sm:p-6">
         {filteredRequests.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-center">
             <MessageSquare className="h-16 w-16 text-muted-foreground mb-4" />
@@ -214,26 +214,28 @@ const MyRequests = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid gap-4">
+           <div className="space-y-4">
             {filteredRequests.map((request) => (
               <Card key={request.id} className="hover:shadow-md transition-shadow">
                 <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <CardTitle className="text-headline-medium">
+                  <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+                    <div className="flex-1 w-full">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 mb-2">
+                        <CardTitle className="text-lg sm:text-xl font-semibold">
                           {request.title}
                         </CardTitle>
-                        <Badge variant={getStatusVariant(request.status)} className="flex items-center gap-1">
-                          {getStatusIcon(request.status)}
-                          {getStatusText(request.status)}
-                        </Badge>
-                        <Badge variant={getPriorityVariant(request.priority)}>
-                          Prioridade {request.priority === 'high' ? 'Alta' : request.priority === 'normal' ? 'Normal' : 'Baixa'}
-                        </Badge>
+                        <div className="flex gap-2 flex-wrap">
+                          <Badge variant={getStatusVariant(request.status)} className="flex items-center gap-1">
+                            {getStatusIcon(request.status)}
+                            {getStatusText(request.status)}
+                          </Badge>
+                          <Badge variant={getPriorityVariant(request.priority)}>
+                            Prioridade {request.priority === 'high' ? 'Alta' : request.priority === 'normal' ? 'Normal' : 'Baixa'}
+                          </Badge>
+                        </div>
                       </div>
                       
-                      <div className="flex items-center gap-4 text-body-small text-muted-foreground">
+                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                         <span><strong>ID:</strong> {request.id}</span>
                         <span><strong>Solicitado em:</strong> {new Date(request.requestDate).toLocaleDateString('pt-BR')}</span>
                         <span><strong>Estimativa:</strong> {new Date(request.estimatedCompletion).toLocaleDateString('pt-BR')}</span>
@@ -246,12 +248,12 @@ const MyRequests = () => {
                 </CardHeader>
                 
                 <CardContent className="pt-0">
-                  <p className="text-body-medium text-muted-foreground mb-4">
+                  <p className="text-sm sm:text-base text-muted-foreground mb-4">
                     {request.description}
                   </p>
                   
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div className="flex gap-2 flex-wrap">
                       {request.tags.map((tag, index) => (
                         <Badge key={index} variant="outline" className="text-xs">
                           {tag}
@@ -259,23 +261,23 @@ const MyRequests = () => {
                       ))}
                     </div>
                     
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
+                    <div className="flex gap-2 flex-wrap w-full sm:w-auto">
+                      <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
                         <Eye className="h-4 w-4 mr-1" />
-                        Detalhes
+                        <span className="hidden sm:inline">Detalhes</span>
                       </Button>
                       
                       {request.status === 'completed' && (
-                        <Button size="sm">
+                        <Button size="sm" className="flex-1 sm:flex-none">
                           <Download className="h-4 w-4 mr-1" />
-                          Acessar
+                          <span className="hidden sm:inline">Acessar</span>
                         </Button>
                       )}
                       
                       {request.status === 'pending' && (
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
                           <XCircle className="h-4 w-4 mr-1" />
-                          Cancelar
+                          <span className="hidden sm:inline">Cancelar</span>
                         </Button>
                       )}
                       
@@ -283,6 +285,7 @@ const MyRequests = () => {
                         variant="outline" 
                         size="sm" 
                         onClick={() => navigate(`/data-assistant?requestId=${request.id}`)}
+                        className="flex-1 sm:flex-none"
                       >
                         <MessageSquare className="h-4 w-4 mr-1" />
                         Chat

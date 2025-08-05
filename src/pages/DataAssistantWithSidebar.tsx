@@ -447,24 +447,24 @@ Posso te avisar quando estiver pronto?`,
   // Show welcome screen if no session
   if (!currentSession || currentStep === 'welcome') {
     return (
-      <div className="min-h-screen bg-background flex">
+      <div className="min-h-screen bg-background flex flex-col md:flex-row">
         <ChatSidebar onNewChat={handleNewChat} />
         
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <div className="flex items-center p-4 border-b bg-card">
-            <Button variant="ghost" size="icon" className="mr-3" onClick={() => navigate('/')}>
+          <div className="flex items-center p-3 sm:p-4 border-b bg-card">
+            <Button variant="ghost" size="icon" className="mr-2 sm:mr-3 md:hidden" onClick={() => navigate('/')}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-headline-large text-foreground">Assistente de Dados</h1>
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">Assistente de Dados</h1>
           </div>
 
           {/* Welcome Content */}
-          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-            <div className="mb-8">
-              <MessageCircle className="h-16 w-16 text-accent mx-auto mb-4" />
-              <h2 className="text-display-small text-foreground mb-2">Assistente de Dados</h2>
-              <p className="text-body-large text-muted-foreground max-w-sm mx-auto">
+          <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 text-center pb-20 md:pb-6">
+            <div className="mb-6 sm:mb-8">
+              <MessageCircle className="h-12 w-12 sm:h-16 sm:w-16 text-accent mx-auto mb-3 sm:mb-4" />
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">Assistente de Dados</h2>
+              <p className="text-sm sm:text-base text-muted-foreground max-w-sm mx-auto">
                 Converse comigo para solicitar ou consultar dados.
               </p>
             </div>
@@ -472,7 +472,7 @@ Posso te avisar quando estiver pronto?`,
             <Button 
               onClick={handleStartConversation}
               size="lg"
-              className="w-full max-w-sm"
+              className="w-full max-w-xs h-12 text-base"
             >
               <MessageCircle className="mr-2 h-5 w-5" />
               Iniciar Conversa
@@ -485,16 +485,16 @@ Posso te avisar quando estiver pronto?`,
 
   // Main chat interface
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex flex-col md:flex-row">
       <ChatSidebar onNewChat={handleNewChat} />
       
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="flex items-center p-4 border-b bg-card">
-          <Button variant="ghost" size="icon" className="mr-3" onClick={() => navigate('/')}>
+        <div className="flex items-center p-3 sm:p-4 border-b bg-card">
+          <Button variant="ghost" size="icon" className="mr-2 sm:mr-3 md:hidden" onClick={() => navigate('/')}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-headline-large text-foreground">{currentSession.title}</h1>
+          <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground truncate">{currentSession.title}</h1>
         </div>
 
         {/* Messages */}

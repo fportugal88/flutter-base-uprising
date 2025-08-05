@@ -94,24 +94,24 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-2 sm:p-4">
-      <Card className="w-full max-w-md mx-2 sm:mx-0">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Fusion Data Bridge</CardTitle>
-          <CardDescription>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted px-4 py-6">
+      <Card className="w-full max-w-sm">
+        <CardHeader className="text-center space-y-2 pb-4">
+          <CardTitle className="text-xl sm:text-2xl font-bold">Fusion Data Bridge</CardTitle>
+          <CardDescription className="text-sm">
             Faça login ou crie sua conta para acessar o assistente de dados
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 pb-6">
           {/* Social Login Buttons */}
-          <div className="space-y-3 mb-6">
+          <div className="space-y-3 mb-4">
             <Button 
               variant="outline" 
-              className="w-full"
+              className="w-full h-12 text-base"
               onClick={() => handleSocialLogin('google')}
               disabled={isLoading}
             >
-              <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+              <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24">
                 <path
                   fill="currentColor"
                   d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -134,11 +134,11 @@ const Auth = () => {
 
             <Button 
               variant="outline" 
-              className="w-full"
+              className="w-full h-12 text-base"
               onClick={() => handleSocialLogin('apple')}
               disabled={isLoading}
             >
-              <Apple className="mr-2 h-4 w-4" />
+              <Apple className="mr-3 h-5 w-5" />
               Continuar com Apple
             </Button>
           </div>
@@ -154,23 +154,23 @@ const Auth = () => {
             </div>
           </div>
 
-          <Tabs defaultValue="login" className="w-full mt-6">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="signup">Cadastro</TabsTrigger>
+          <Tabs defaultValue="login" className="w-full mt-4">
+            <TabsList className="grid w-full grid-cols-2 h-12">
+              <TabsTrigger value="login" className="text-base">Login</TabsTrigger>
+              <TabsTrigger value="signup" className="text-base">Cadastro</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="login" className="space-y-4">
+            <TabsContent value="login" className="space-y-4 mt-4">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                     <Input
                       id="email"
                       type="email"
                       placeholder="seu@email.com"
-                      className="pl-10"
+                      className="pl-12 h-12 text-base"
                       value={loginData.email}
                       onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
                       required
@@ -181,12 +181,12 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="password">Senha</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                     <Input
                       id="password"
                       type="password"
                       placeholder="Digite sua senha"
-                      className="pl-10"
+                      className="pl-12 h-12 text-base"
                       value={loginData.password}
                       onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
                       required
@@ -194,10 +194,10 @@ const Auth = () => {
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full h-12 text-base" disabled={isLoading}>
                   {isLoading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       Entrando...
                     </>
                   ) : (
@@ -207,17 +207,17 @@ const Auth = () => {
               </form>
             </TabsContent>
 
-            <TabsContent value="signup" className="space-y-4">
+            <TabsContent value="signup" className="space-y-4 mt-4">
               <form onSubmit={handleSignup} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-name">Nome</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                     <Input
                       id="signup-name"
                       type="text"
                       placeholder="Seu nome"
-                      className="pl-10"
+                      className="pl-12 h-12 text-base"
                       value={signupData.displayName}
                       onChange={(e) => setSignupData({ ...signupData, displayName: e.target.value })}
                       required
@@ -228,12 +228,12 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                     <Input
                       id="signup-email"
                       type="email"
                       placeholder="seu@email.com"
-                      className="pl-10"
+                      className="pl-12 h-12 text-base"
                       value={signupData.email}
                       onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
                       required
@@ -244,12 +244,12 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Senha</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                     <Input
                       id="signup-password"
                       type="password"
                       placeholder="Crie uma senha"
-                      className="pl-10"
+                      className="pl-12 h-12 text-base"
                       value={signupData.password}
                       onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
                       required
@@ -260,12 +260,12 @@ const Auth = () => {
                 <div className="space-y-2">
                   <Label htmlFor="confirm-password">Confirmar Senha</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
                     <Input
                       id="confirm-password"
                       type="password"
                       placeholder="Confirme sua senha"
-                      className="pl-10"
+                      className="pl-12 h-12 text-base"
                       value={signupData.confirmPassword}
                       onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
                       required
@@ -273,10 +273,10 @@ const Auth = () => {
                   </div>
                 </div>
 
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full h-12 text-base" disabled={isLoading}>
                   {isLoading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       Criando conta...
                     </>
                   ) : (
@@ -287,7 +287,7 @@ const Auth = () => {
             </TabsContent>
           </Tabs>
 
-          <div className="text-center text-sm text-muted-foreground mt-6">
+          <div className="text-center text-xs text-muted-foreground mt-4 px-2">
             Ao continuar, você concorda com nossos termos de uso e política de privacidade.
           </div>
         </CardContent>

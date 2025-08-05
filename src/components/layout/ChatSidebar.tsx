@@ -41,7 +41,7 @@ export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
   };
 
   return (
-    <div className="w-80 bg-card border-r border-border flex flex-col h-full">
+    <div className="hidden md:flex w-64 lg:w-80 bg-card border-r border-border flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-border">
         <Button 
