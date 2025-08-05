@@ -42,37 +42,41 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 export function ChatProvider({ children }: { children: ReactNode }) {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentSession, setCurrentSession] = useState<ChatSession | null>(null);
-  const { user } = useAuth();
+  const { user, session } = useAuth();
 
   useEffect(() => {
-    if (!user) {
-      setSessions([]);
-      setCurrentSession(null);
-      return;
-    }
+    const loadSessions = async () => {
+      if (!user || !session) {
+        setSessions([]);
+        setCurrentSession(null);
+        return;
+      }
 
-    supabase
-      .from('chat_sessions')
-      .select('*')
-      .eq('user_id', user.id as any)
-      .order('created_at', { ascending: false })
-      .then(({ data, error }) => {
-        if (error) {
-          console.error('Error loading sessions', error);
-          return;
-        }
-        const loaded = (data || []).map((row: any) => ({
-          id: row.id,
-          title: row.title,
-          createdAt: new Date(row.created_at),
-          lastMessage: new Date(row.last_message_at),
-          messages: [],
-          requestId: row.request_id || undefined,
-          status: row.status as 'active' | 'completed' | 'archived',
-        }));
-        setSessions(loaded);
-      });
-  }, [user]);
+      const { data, error } = await supabase
+        .from('chat_sessions')
+        .select('*')
+        .eq('user_id', user.id as any)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading sessions', error);
+        return;
+      }
+
+      const loaded = (data || []).map((row: any) => ({
+        id: row.id,
+        title: row.title,
+        createdAt: new Date(row.created_at),
+        lastMessage: new Date(row.last_message_at),
+        messages: [],
+        requestId: row.request_id || undefined,
+        status: row.status as 'active' | 'completed' | 'archived',
+      }));
+      setSessions(loaded);
+    };
+
+    loadSessions();
+  }, [user, session]);
 
   const createNewSession = (title?: string): string => {
     const id = crypto.randomUUID();
