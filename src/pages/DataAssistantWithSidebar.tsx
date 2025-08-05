@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Send, ArrowLeft, Check, Database, Clock, Tag, ExternalLink, AlertCircle, FileText, Eye, Edit3, X } from "lucide-react";
 import { ChatSidebar } from "@/components/layout/ChatSidebar";
 import { useChat } from "@/contexts/ChatContext";
+import { useRequests } from "@/hooks/useRequests";
 
 interface DataSuggestion {
   name: string;
@@ -73,6 +74,7 @@ const DataAssistantWithSidebar = () => {
     linkSessionToRequest,
     getSessionByRequest 
   } = useChat();
+  const { createRequest } = useRequests();
   
   const [currentStep, setCurrentStep] = useState<ConversationStep>('welcome');
   const [inputValue, setInputValue] = useState('');
@@ -369,34 +371,54 @@ Posso te avisar quando estiver pronto?`,
     });
   };
 
-  const handleConfirmRequest = () => {
+  const handleConfirmRequest = async () => {
     addMessage({
       type: 'user',
       content: 'Confirmar pedido'
     });
 
     setCurrentStep('confirmation');
-    const requestId = '#DADOS-' + Math.floor(Math.random() * 10000);
-    setRequestData(prev => ({ ...prev, requestId }));
 
-    // Link session to request
-    if (currentSession) {
-      linkSessionToRequest(currentSession.id, requestId);
-    }
+    // Create request in database
+    const newRequest = await createRequest({
+      titulo: requestData.objective,
+      descricao: `Solicitação criada via chat assistente.
+      
+Detalhes:
+- Granularidade: ${requestData.dataType}
+- Frequência: ${requestData.frequency}
+- Privacidade: ${requestData.privacy}
+- Caso de negócio: ${requestData.businessCase}`,
+      categoria: [requestData.dataType, requestData.frequency],
+      prioridade: 'normal',
+      origem_canal: 'chat',
+      justificativa_negocio: requestData.businessCase,
+      impacto_estimado: 'medio',
+      classificacao_dado: requestData.privacy.includes('pessoais') ? 'PII' : 'nao_sensivel'
+    });
 
-    simulateTyping(() => {
-      addMessage({
-        type: 'assistant',
-        content: `Pedido criado com sucesso! 
+    if (newRequest) {
+      setRequestData(prev => ({ ...prev, requestId: newRequest.codigo_solicitacao }));
 
-**Protocolo**: ${requestId}
+      // Link session to request
+      if (currentSession) {
+        linkSessionToRequest(currentSession.id, newRequest.codigo_solicitacao);
+      }
+
+      simulateTyping(() => {
+        addMessage({
+          type: 'assistant',
+          content: `Pedido criado com sucesso! 
+
+**Protocolo**: ${newRequest.codigo_solicitacao}
 ⏱️ **SLA estimado**: até 3 dias úteis
 📬 **Atualizações**: Você receberá por aqui
 
 Posso te avisar quando estiver pronto?`,
-        quickReplies: ['Sim, me avise', 'Ver minhas solicitações']
+          quickReplies: ['Sim, me avise', 'Ver minhas solicitações']
+        });
       });
-    });
+    }
   };
 
   const handleEditRequest = () => {
