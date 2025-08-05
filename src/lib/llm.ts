@@ -4,6 +4,7 @@ export type LLMMessage = {
 };
 
 import { supabase } from '@/integrations/supabase/client';
+import { supabaseApi } from '@/lib/supabase-api';
 import CryptoJS from 'crypto-js';
 
 const SECRET = 'fusion_data_bridge_secret_key';
@@ -20,7 +21,7 @@ async function getApiKey(): Promise<string | null> {
     }
 
     console.log('llm.getApiKey: user found, making API call...');
-    const { data, error } = await supabase
+    const { data, error } = await supabaseApi
       .from('user_api_keys')
       .select('encrypted_key')
       .eq('user_id', user.id)

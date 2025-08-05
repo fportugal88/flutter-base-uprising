@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseApi } from '@/lib/supabase-api';
 import { useAuth } from '@/contexts/AuthContext';
 import CryptoJS from 'crypto-js';
 
@@ -33,7 +33,7 @@ export const useApiKeys = () => {
     setLoading(true);
     try {
       console.log('checkForOpenAIKey: making API call...');
-      const { data, error } = await supabase
+      const { data, error } = await supabaseApi
         .from('user_api_keys')
         .select('*')
         .eq('user_id', user.id)
@@ -74,7 +74,7 @@ export const useApiKeys = () => {
       const encrypted = CryptoJS.AES.encrypt(apiKey, SECRET).toString();
       
       console.log('saveApiKey: making upsert call...');
-      const { error } = await supabase
+      const { error } = await supabaseApi
         .from('user_api_keys')
         .upsert({
           user_id: user.id,
@@ -115,7 +115,7 @@ export const useApiKeys = () => {
 
     try {
       console.log('getApiKey: making API call...');
-      const { data, error } = await supabase
+      const { data, error } = await supabaseApi
         .from('user_api_keys')
         .select('encrypted_key')
         .eq('user_id', user.id)
@@ -153,7 +153,7 @@ export const useApiKeys = () => {
     setLoading(true);
     try {
       console.log('removeApiKey: making delete call...');
-      const { error } = await supabase
+      const { error } = await supabaseApi
         .from('user_api_keys')
         .delete()
         .eq('user_id', user.id)
