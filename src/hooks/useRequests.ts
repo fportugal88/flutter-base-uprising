@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 export interface Request {
   id: string;
@@ -72,7 +73,12 @@ export interface RequestComment {
   user_name?: string;
 }
 
-export const useRequests = () => {
+interface UseRequestsOptions {
+  autoFetch?: boolean;
+}
+
+export const useRequests = (options: UseRequestsOptions = {}) => {
+  const { autoFetch = true } = options;
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -163,7 +169,7 @@ export const useRequests = () => {
           classificacao_dado: requestData.classificacao_dado || 'nao_sensivel',
           estimativa_entrega: requestData.estimativa_entrega,
           proposito_de_uso: requestData.proposito_de_uso
-        } as any)
+        } as TablesInsert<'requests'>)
         .select('*')
         .single();
 
@@ -192,7 +198,7 @@ export const useRequests = () => {
     try {
       const { data, error } = await supabase
         .from('requests')
-        .update(updates as any)
+        .update(updates as TablesUpdate<'requests'>)
         .eq('id', id)
         .select('*')
         .single();
@@ -254,10 +260,10 @@ export const useRequests = () => {
   };
 
   useEffect(() => {
-    if (user) {
+    if (autoFetch && user) {
       fetchUserRequests();
     }
-  }, [user]);
+  }, [user, autoFetch]);
 
   return {
     requests,
