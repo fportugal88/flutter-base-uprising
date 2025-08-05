@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -110,17 +110,20 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
     }
   };
 
-  const fetchUserRequests = async () => {
-    if (!user) return;
-
+  const fetchUserRequests = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
+      const currentUser = user || (await supabase.auth.getUser()).data.user;
+      if (!currentUser) {
+        throw new Error('Usuário não autenticado');
+      }
+
       const { data, error } = await supabase
         .from('requests')
         .select('*')
-        .eq('solicitante_id', user.id)
+        .eq('solicitante_id', currentUser.id)
         .order('criado_em', { ascending: false });
 
       if (error) throw error;
@@ -137,7 +140,7 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   const createRequest = async (requestData: CreateRequestInput) => {
     if (!user) {
@@ -260,10 +263,10 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
   };
 
   useEffect(() => {
-    if (autoFetch && user) {
+    if (autoFetch) {
       fetchUserRequests();
     }
-  }, [user, autoFetch]);
+  }, [autoFetch, fetchUserRequests]);
 
   return {
     requests,
