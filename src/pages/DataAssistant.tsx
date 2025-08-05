@@ -493,7 +493,7 @@ Posso te avisar quando estiver pronto?`,
             <Button variant="ghost" size="icon" className="mr-3" onClick={() => navigate(-1)}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-headline-large text-foreground">Assistente de Dados</h1>
+            <h1 className="text-headline-large text-foreground">Descobrir</h1>
           </div>
 
           {/* Content */}
@@ -501,7 +501,7 @@ Posso te avisar quando estiver pronto?`,
             <div className="mb-8">
               <MessageCircle className="h-16 w-16 text-accent mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-foreground mb-2">
-                Assistente de Dados
+                Descobrir
               </h2>
               <p className="text-base text-muted-foreground max-w-md">
                 Seu parceiro inteligente para encontrar, solicitar e acessar dados. 
@@ -531,7 +531,7 @@ Posso te avisar quando estiver pronto?`,
           <Button variant="ghost" size="icon" className="mr-3" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-headline-large text-foreground">Assistente de Dados</h1>
+          <h1 className="text-headline-large text-foreground">Descobrir</h1>
         </div>
 
       {/* Messages */}

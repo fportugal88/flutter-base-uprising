@@ -12,7 +12,7 @@ import { BottomNavigation } from './BottomNavigation';
 
 const sidebarItems = [
   { title: 'Home', url: '/', icon: Home },
-  { title: 'Assistente de Dados', url: '/data-assistant', icon: BarChart3 },
+  { title: 'Descobrir', url: '/data-assistant', icon: BarChart3 },
   { title: 'Minhas Solicitações', url: '/my-requests', icon: FileText },
 ];
 
