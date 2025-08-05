@@ -1,32 +1,52 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
-import { saveApiKey, getApiKey, clearApiKey } from "@/lib/secureStorage";
+import { useApiKeys } from "@/hooks/useApiKeys";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { useToast } from "@/hooks/use-toast";
 
 const Profile = () => {
   const navigate = useNavigate();
   const [apiKey, setApiKey] = useState("");
-  const [hasKey, setHasKey] = useState(false);
+  const { hasOpenAIKey, saveApiKey, removeApiKey, loading } = useApiKeys();
+  const { toast } = useToast();
 
-  useEffect(() => {
-    const existing = getApiKey();
-    setHasKey(!!existing);
-  }, []);
-
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!apiKey) return;
-    saveApiKey(apiKey);
-    setApiKey("");
-    setHasKey(true);
+    
+    const success = await saveApiKey('openai', apiKey);
+    if (success) {
+      setApiKey("");
+      toast({
+        title: "Chave salva",
+        description: "Sua chave OpenAI foi salva com segurança.",
+      });
+    } else {
+      toast({
+        title: "Erro",
+        description: "Não foi possível salvar a chave. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleRemove = () => {
-    clearApiKey();
-    setHasKey(false);
+  const handleRemove = async () => {
+    const success = await removeApiKey('openai');
+    if (success) {
+      toast({
+        title: "Chave removida",
+        description: "Sua chave OpenAI foi removida.",
+      });
+    } else {
+      toast({
+        title: "Erro",
+        description: "Não foi possível remover a chave. Tente novamente.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -45,7 +65,7 @@ const Profile = () => {
               <CardTitle>OpenAI API Key</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {hasKey && (
+              {hasOpenAIKey && (
                 <p className="text-sm text-muted-foreground">
                   Uma chave de API já está configurada.
                 </p>
@@ -55,12 +75,15 @@ const Profile = () => {
                 placeholder="Insira sua chave de API"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
+                disabled={loading}
               />
               <div className="flex gap-2">
-                <Button onClick={handleSave} disabled={!apiKey}>Salvar</Button>
-                {hasKey && (
-                  <Button variant="outline" onClick={handleRemove}>
-                    Remover
+                <Button onClick={handleSave} disabled={!apiKey || loading}>
+                  {loading ? "Salvando..." : "Salvar"}
+                </Button>
+                {hasOpenAIKey && (
+                  <Button variant="outline" onClick={handleRemove} disabled={loading}>
+                    {loading ? "Removendo..." : "Remover"}
                   </Button>
                 )}
               </div>
