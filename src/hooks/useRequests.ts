@@ -38,7 +38,7 @@ export interface Request {
   proposito_de_uso?: string;
   validade_uso?: string;
   updated_at: string;
-  // Joined fields from profiles table
+  // Fields from the profiles table. These are populated only when the query joins the profiles table explicitly.
   solicitante_name?: string;
   responsavel_name?: string;
   curador_name?: string;
