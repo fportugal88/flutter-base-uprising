@@ -9,15 +9,8 @@ async function getApiKey(): Promise<string | null> {
   try {
     console.log('llm.getApiKey: starting...');
     
-    // Usar getUser igual ao ChatContext - padrão que funciona
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) {
-      console.error('llm.getApiKey: user error or no user', userError);
-      return null;
-    }
-
     console.log('llm.getApiKey: checking for OPENAI_API_KEY secret...');
-    // Agora usamos o sistema de secrets do Supabase
+    // Função configurada sem verificação JWT, pode ser chamada diretamente
     const { data, error } = await supabase.functions.invoke('get-secret', {
       body: { name: 'OPENAI_API_KEY' }
     });
