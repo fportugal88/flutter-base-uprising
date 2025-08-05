@@ -14,27 +14,25 @@ interface ApiKey {
 }
 
 export const useApiKeys = () => {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const [loading, setLoading] = useState(false);
   const [hasOpenAIKey, setHasOpenAIKey] = useState(false);
 
-  // Check if user has OpenAI key
-  const checkForOpenAIKey = async () => {
-    if (!user) {
-      setHasOpenAIKey(false);
-      return;
-    }
+  console.log('useApiKeys: user=', !!user, 'session=', !!session);
 
-    // Wait for session to be fully authenticated
-    const { data: { session: currentSession } } = await supabase.auth.getSession();
-    if (!currentSession) {
-      console.log('No active session, skipping API key check');
+  // Check if user has OpenAI key - seguindo padrão chat_sessions
+  const checkForOpenAIKey = async () => {
+    console.log('checkForOpenAIKey: starting check, user=', !!user, 'session=', !!session);
+    
+    if (!user || !session) {
+      console.log('checkForOpenAIKey: no user or session, setting false');
       setHasOpenAIKey(false);
       return;
     }
     
     setLoading(true);
     try {
+      console.log('checkForOpenAIKey: making API call...');
       const { data, error } = await supabase
         .from('user_api_keys')
         .select('*')
@@ -42,38 +40,40 @@ export const useApiKeys = () => {
         .eq('provider', 'openai')
         .maybeSingle();
 
+      console.log('checkForOpenAIKey: response data=', data, 'error=', error);
+
       if (error) {
         console.error('Error checking API key:', error);
         setHasOpenAIKey(false);
         return;
       }
 
-      setHasOpenAIKey(!!data);
+      const hasKey = !!data;
+      console.log('checkForOpenAIKey: setting hasOpenAIKey to', hasKey);
+      setHasOpenAIKey(hasKey);
     } catch (error) {
-      console.error('Error checking API key:', error);
+      console.error('checkForOpenAIKey: exception', error);
+      setHasOpenAIKey(false);
     } finally {
       setLoading(false);
     }
   };
 
-  // Save API key
+  // Save API key - seguindo padrão chat_sessions
   const saveApiKey = async (provider: string, apiKey: string) => {
-    if (!user || !apiKey) {
-      console.error('User not authenticated or API key empty');
-      return false;
-    }
-
-    // Ensure session is active
-    const { data: { session: currentSession } } = await supabase.auth.getSession();
-    if (!currentSession) {
-      console.error('No active session');
+    console.log('saveApiKey: starting, provider=', provider, 'hasKey=', !!apiKey, 'user=', !!user, 'session=', !!session);
+    
+    if (!user || !session || !apiKey) {
+      console.error('saveApiKey: missing requirements - user:', !!user, 'session:', !!session, 'apiKey:', !!apiKey);
       return false;
     }
 
     setLoading(true);
     try {
+      console.log('saveApiKey: encrypting key...');
       const encrypted = CryptoJS.AES.encrypt(apiKey, SECRET).toString();
-
+      
+      console.log('saveApiKey: making upsert call...');
       const { error } = await supabase
         .from('user_api_keys')
         .upsert({
@@ -82,38 +82,39 @@ export const useApiKeys = () => {
           encrypted_key: encrypted
         });
 
+      console.log('saveApiKey: upsert response, error=', error);
+
       if (error) {
         console.error('Error saving API key:', error);
         return false;
       }
 
       if (provider === 'openai') {
+        console.log('saveApiKey: setting hasOpenAIKey to true');
         setHasOpenAIKey(true);
       }
+      
+      console.log('saveApiKey: success');
       return true;
     } catch (error) {
-      console.error('Error saving API key:', error);
+      console.error('saveApiKey: exception', error);
       return false;
     } finally {
       setLoading(false);
     }
   };
 
-  // Get API key (decrypted)
+  // Get API key (decrypted) - seguindo padrão chat_sessions
   const getApiKey = async (provider: string): Promise<string | null> => {
-    if (!user) {
-      console.error('User not authenticated');
-      return null;
-    }
-
-    // Ensure session is active
-    const { data: { session: currentSession } } = await supabase.auth.getSession();
-    if (!currentSession) {
-      console.error('No active session');
+    console.log('getApiKey: starting, provider=', provider, 'user=', !!user, 'session=', !!session);
+    
+    if (!user || !session) {
+      console.error('getApiKey: no user or session');
       return null;
     }
 
     try {
+      console.log('getApiKey: making API call...');
       const { data, error } = await supabase
         .from('user_api_keys')
         .select('encrypted_key')
@@ -121,40 +122,44 @@ export const useApiKeys = () => {
         .eq('provider', provider)
         .maybeSingle();
 
+      console.log('getApiKey: response data=', !!data, 'error=', error);
+
       if (error || !data) {
+        console.log('getApiKey: no data or error, returning null');
         return null;
       }
 
+      console.log('getApiKey: decrypting...');
       const bytes = CryptoJS.AES.decrypt(data.encrypted_key, SECRET);
       const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+      
+      console.log('getApiKey: decryption success=', !!decrypted);
       return decrypted || null;
     } catch (error) {
-      console.error('Error getting API key:', error);
+      console.error('getApiKey: exception', error);
       return null;
     }
   };
 
-  // Remove API key
+  // Remove API key - seguindo padrão chat_sessions
   const removeApiKey = async (provider: string) => {
-    if (!user) {
-      console.error('User not authenticated');
-      return false;
-    }
-
-    // Ensure session is active
-    const { data: { session: currentSession } } = await supabase.auth.getSession();
-    if (!currentSession) {
-      console.error('No active session');
+    console.log('removeApiKey: starting, provider=', provider, 'user=', !!user, 'session=', !!session);
+    
+    if (!user || !session) {
+      console.error('removeApiKey: no user or session');
       return false;
     }
 
     setLoading(true);
     try {
+      console.log('removeApiKey: making delete call...');
       const { error } = await supabase
         .from('user_api_keys')
         .delete()
         .eq('user_id', user.id)
         .eq('provider', provider);
+
+      console.log('removeApiKey: delete response, error=', error);
 
       if (error) {
         console.error('Error removing API key:', error);
@@ -162,22 +167,31 @@ export const useApiKeys = () => {
       }
 
       if (provider === 'openai') {
+        console.log('removeApiKey: setting hasOpenAIKey to false');
         setHasOpenAIKey(false);
       }
+      
+      console.log('removeApiKey: success');
       return true;
     } catch (error) {
-      console.error('Error removing API key:', error);
+      console.error('removeApiKey: exception', error);
       return false;
     } finally {
       setLoading(false);
     }
   };
 
+  // Carregar dados quando user e session estiverem disponíveis - igual chat_sessions
   useEffect(() => {
-    if (user) {
+    console.log('useApiKeys: useEffect triggered, user=', !!user, 'session=', !!session);
+    if (user && session) {
+      console.log('useApiKeys: calling checkForOpenAIKey');
       checkForOpenAIKey();
+    } else {
+      console.log('useApiKeys: no user/session, resetting state');
+      setHasOpenAIKey(false);
     }
-  }, [user]);
+  }, [user, session]);
 
   return {
     loading,
