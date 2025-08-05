@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Send, ArrowLeft, Check, Database, Clock, Tag, ExternalLink, AlertCircle, FileText, Eye, Edit3, X } from "lucide-react";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 interface Message {
   id: string;
@@ -485,47 +486,53 @@ Posso te avisar quando estiver pronto?`,
 
   if (currentStep === 'welcome') {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        {/* Header */}
-        <div className="flex items-center p-4 border-b bg-card">
-        <Button variant="ghost" size="icon" className="mr-3" onClick={() => navigate('/')}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-          <h1 className="text-headline-large text-foreground">Assistente de Dados</h1>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <div className="mb-8">
-            <MessageCircle className="h-16 w-16 text-accent mx-auto mb-4" />
-            <h2 className="text-display-small text-foreground mb-2">Assistente de Dados</h2>
-            <p className="text-body-large text-muted-foreground max-w-sm mx-auto">
-              Converse comigo para solicitar ou consultar dados.
-            </p>
+      <AppLayout>
+        <div className="flex flex-col h-full">
+          {/* Page Header */}
+          <div className="flex items-center p-4 border-b bg-card">
+            <Button variant="ghost" size="icon" className="mr-3" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-headline-large text-foreground">Assistente de Dados</h1>
           </div>
 
-          <Button 
-            onClick={handleStartConversation}
-            size="lg"
-            className="w-full max-w-sm"
-          >
-            <MessageCircle className="mr-2 h-5 w-5" />
-            Iniciar Conversa
-          </Button>
+          {/* Content */}
+          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+            <div className="mb-8">
+              <MessageCircle className="h-16 w-16 text-accent mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-foreground mb-2">
+                Assistente de Dados
+              </h2>
+              <p className="text-base text-muted-foreground max-w-md">
+                Seu parceiro inteligente para encontrar, solicitar e acessar dados. 
+                Comece uma conversa e eu te ajudo a encontrar exatamente o que você precisa.
+              </p>
+            </div>
+
+            <Button 
+              onClick={handleStartConversation}
+              size="lg"
+              className="text-lg px-8 py-6"
+            >
+              <MessageCircle className="mr-3 h-5 w-5" />
+              Iniciar Conversa
+            </Button>
+          </div>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <div className="flex items-center p-4 border-b bg-card">
-        <Button variant="ghost" size="icon" className="mr-3" onClick={() => navigate('/')}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-headline-large text-foreground">Assistente de Dados</h1>
-      </div>
+    <AppLayout>
+      <div className="flex flex-col h-full">
+        {/* Page Header */}
+        <div className="flex items-center p-4 border-b bg-card">
+          <Button variant="ghost" size="icon" className="mr-3" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-headline-large text-foreground">Assistente de Dados</h1>
+        </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -832,9 +839,10 @@ Posso te avisar quando estiver pronto?`,
           >
             <Send className="h-4 w-4" />
           </Button>
+         </div>
         </div>
       </div>
-    </div>
+    </AppLayout>
   );
 };
 
