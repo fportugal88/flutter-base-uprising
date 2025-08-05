@@ -4,10 +4,6 @@ export type LLMMessage = {
 };
 
 import { supabase } from '@/integrations/supabase/client';
-import { supabaseApi } from '@/lib/supabase-api';
-import CryptoJS from 'crypto-js';
-
-const SECRET = 'fusion_data_bridge_secret_key';
 
 async function getApiKey(): Promise<string | null> {
   try {
@@ -20,27 +16,18 @@ async function getApiKey(): Promise<string | null> {
       return null;
     }
 
-    console.log('llm.getApiKey: user found, making API call...');
-    const { data, error } = await supabaseApi
-      .from('user_api_keys')
-      .select('encrypted_key')
-      .eq('user_id', user.id)
-      .eq('provider', 'openai')
-      .maybeSingle();
+    console.log('llm.getApiKey: checking for OPENAI_API_KEY secret...');
+    // Agora usamos o sistema de secrets do Supabase
+    const { data, error } = await supabase.functions.invoke('get-secret', {
+      body: { name: 'OPENAI_API_KEY' }
+    });
 
-    console.log('llm.getApiKey: API response data=', !!data, 'error=', error);
-
-    if (error || !data) {
-      console.log('llm.getApiKey: no data or error');
+    if (error) {
+      console.error('llm.getApiKey: error getting secret', error);
       return null;
     }
 
-    console.log('llm.getApiKey: decrypting...');
-    const bytes = CryptoJS.AES.decrypt(data.encrypted_key, SECRET);
-    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-    
-    console.log('llm.getApiKey: decryption success=', !!decrypted);
-    return decrypted || null;
+    return data?.value || null;
   } catch (error) {
     console.error('llm.getApiKey: exception', error);
     return null;
