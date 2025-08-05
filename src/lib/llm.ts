@@ -17,8 +17,9 @@ export async function sendChatMessage(messages: LLMMessage[]): Promise<string> {
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4.1-2025-04-14',
       messages,
+      max_tokens: 1000,
     }),
   });
 
