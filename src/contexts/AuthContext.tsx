@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -27,7 +26,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   const cleanupAuthState = () => {
     // Remove all Supabase auth keys from localStorage
@@ -88,28 +86,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        toast({
-          title: "Erro no cadastro",
-          description: error.message,
-          variant: "destructive",
-        });
+        console.error('Signup error:', error.message);
         return { error };
       }
 
       if (data.user && !data.session) {
-        toast({
-          title: "Verifique seu email",
-          description: "Por favor, verifique seu email para confirmar sua conta.",
-        });
+        console.log('Please check your email to confirm your account');
       }
 
       return { error: null };
     } catch (error: any) {
-      toast({
-        title: "Erro no cadastro",
-        description: error.message,
-        variant: "destructive",
-      });
+      console.error('Signup error:', error.message);
       return { error };
     } finally {
       setLoading(false);
@@ -132,30 +119,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        toast({
-          title: "Erro no login",
-          description: error.message,
-          variant: "destructive",
-        });
+        console.error('Login error:', error.message);
         return { error };
       }
 
       if (data.user) {
-        toast({
-          title: "Login realizado com sucesso",
-          description: "Bem-vindo de volta!",
-        });
+        console.log('Login successful');
         // Force page reload for clean state
         window.location.href = '/';
       }
 
       return { error: null };
     } catch (error: any) {
-      toast({
-        title: "Erro no login",
-        description: error.message,
-        variant: "destructive",
-      });
+      console.error('Login error:', error.message);
       return { error };
     } finally {
       setLoading(false);
@@ -182,21 +158,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        toast({
-          title: "Erro no login",
-          description: error.message,
-          variant: "destructive",
-        });
+        console.error('Provider login error:', error.message);
         return { error };
       }
 
       return { error: null };
     } catch (error: any) {
-      toast({
-        title: "Erro no login",
-        description: error.message,
-        variant: "destructive",
-      });
+      console.error('Provider login error:', error.message);
       return { error };
     } finally {
       setLoading(false);
@@ -211,18 +179,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (err) {
         // Ignore errors
       }
-      toast({
-        title: "Logout realizado",
-        description: "Você foi desconectado com sucesso.",
-      });
+      console.log('Logout successful');
       // Force page reload for clean state
       window.location.href = '/auth';
     } catch (error: any) {
-      toast({
-        title: "Erro no logout",
-        description: error.message,
-        variant: "destructive",
-      });
+      console.error('Logout error:', error.message);
     }
   };
 
