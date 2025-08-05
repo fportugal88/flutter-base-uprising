@@ -507,35 +507,35 @@ Posso te avisar quando estiver pronto?`,
   if (!currentSession || currentStep === 'welcome') {
     return (
       <AppLayout>
-        <div className="flex h-full">
-          {/* Sidebar */}
-          <div className="w-80 border-r border-border bg-card hidden md:block">
-            <ChatSidebar onNewChat={handleNewChat} />
+        <div className="flex flex-col h-full">
+          {/* Subheader que ocupa toda largura */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-6 border-b bg-card gap-3">
+            <div className="flex items-center w-full sm:w-auto">
+              <Button variant="ghost" size="icon" className="mr-2 sm:mr-3 md:hidden" onClick={() => navigate(-1)}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div className="flex-1">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Assistente de Dados</h1>
+                <p className="text-sm sm:text-base text-muted-foreground">
+                  Converse comigo para solicitar ou consultar dados
+                </p>
+              </div>
+            </div>
+            
+            <Button 
+              onClick={handleNewChat}
+              className="w-full sm:w-auto h-12 text-base"
+            >
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Nova Conversa
+            </Button>
           </div>
 
-          {/* Main Content */}
-          <div className="flex-1 flex flex-col">
-            {/* Page Header */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-6 border-b bg-card gap-3">
-              <div className="flex items-center w-full sm:w-auto">
-                <Button variant="ghost" size="icon" className="mr-2 sm:mr-3 md:hidden" onClick={() => navigate(-1)}>
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-                <div className="flex-1">
-                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Assistente de Dados</h1>
-                  <p className="text-sm sm:text-base text-muted-foreground">
-                    Converse comigo para solicitar ou consultar dados
-                  </p>
-                </div>
-              </div>
-              
-              <Button 
-                onClick={handleNewChat}
-                className="w-full sm:w-auto h-12 text-base"
-              >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Nova Conversa
-              </Button>
+          {/* Área de conteúdo com sidebar + chat */}
+          <div className="flex flex-1 overflow-hidden">
+            {/* Sidebar */}
+            <div className="w-80 border-r border-border bg-card hidden md:block">
+              <ChatSidebar onNewChat={handleNewChat} />
             </div>
 
             {/* Welcome Content */}
@@ -566,35 +566,38 @@ Posso te avisar quando estiver pronto?`,
   // Main chat interface
   return (
     <AppLayout>
-      <div className="flex h-full">
-        {/* Sidebar */}
-        <div className="w-80 border-r border-border bg-card hidden md:block">
-          <ChatSidebar onNewChat={handleNewChat} />
-        </div>
-        
-        <div className="flex-1 flex flex-col">
-          {/* Page Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-6 border-b bg-card gap-3">
-            <div className="flex items-center w-full sm:w-auto">
-              <Button variant="ghost" size="icon" className="mr-2 sm:mr-3 md:hidden" onClick={() => navigate(-1)}>
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <div className="flex-1">
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Assistente de Dados</h1>
-                <p className="text-sm sm:text-base text-muted-foreground">
-                  {currentSession.title}
-                </p>
-              </div>
-            </div>
-            
-            <Button 
-              onClick={handleNewChat}
-              className="w-full sm:w-auto h-12 text-base"
-            >
-              <MessageCircle className="h-4 w-4 mr-2" />
-              Nova Conversa
+      <div className="flex flex-col h-full">
+        {/* Subheader que ocupa toda largura */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-6 border-b bg-card gap-3">
+          <div className="flex items-center w-full sm:w-auto">
+            <Button variant="ghost" size="icon" className="mr-2 sm:mr-3 md:hidden" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-5 w-5" />
             </Button>
+            <div className="flex-1">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Assistente de Dados</h1>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                {currentSession.title}
+              </p>
+            </div>
           </div>
+          
+          <Button 
+            onClick={handleNewChat}
+            className="w-full sm:w-auto h-12 text-base"
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Nova Conversa
+          </Button>
+        </div>
+
+        {/* Área de conteúdo com sidebar + chat */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Sidebar */}
+          <div className="w-80 border-r border-border bg-card hidden md:block">
+            <ChatSidebar onNewChat={handleNewChat} />
+          </div>
+          
+          <div className="flex-1 flex flex-col">
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -826,7 +829,8 @@ Posso te avisar quando estiver pronto?`,
               <Send className="h-4 w-4" />
             </Button>
           </div>
-        </div>
+            </div>
+          </div>
         </div>
       </div>
     </AppLayout>
