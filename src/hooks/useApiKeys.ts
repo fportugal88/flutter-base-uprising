@@ -24,6 +24,14 @@ export const useApiKeys = () => {
       setHasOpenAIKey(false);
       return;
     }
+
+    // Wait for session to be fully authenticated
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    if (!currentSession) {
+      console.log('No active session, skipping API key check');
+      setHasOpenAIKey(false);
+      return;
+    }
     
     setLoading(true);
     try {
@@ -52,6 +60,13 @@ export const useApiKeys = () => {
   const saveApiKey = async (provider: string, apiKey: string) => {
     if (!user || !apiKey) {
       console.error('User not authenticated or API key empty');
+      return false;
+    }
+
+    // Ensure session is active
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    if (!currentSession) {
+      console.error('No active session');
       return false;
     }
 
@@ -91,6 +106,13 @@ export const useApiKeys = () => {
       return null;
     }
 
+    // Ensure session is active
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    if (!currentSession) {
+      console.error('No active session');
+      return null;
+    }
+
     try {
       const { data, error } = await supabase
         .from('user_api_keys')
@@ -116,6 +138,13 @@ export const useApiKeys = () => {
   const removeApiKey = async (provider: string) => {
     if (!user) {
       console.error('User not authenticated');
+      return false;
+    }
+
+    // Ensure session is active
+    const { data: { session: currentSession } } = await supabase.auth.getSession();
+    if (!currentSession) {
+      console.error('No active session');
       return false;
     }
 

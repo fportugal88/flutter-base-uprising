@@ -10,9 +10,9 @@ const SECRET = 'fusion_data_bridge_secret_key';
 
 async function getApiKey(): Promise<string | null> {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      console.error('User not authenticated');
+    const { data: { user, session } } = await supabase.auth.getUser();
+    if (!user || !session) {
+      console.error('User not authenticated or session expired');
       return null;
     }
 
