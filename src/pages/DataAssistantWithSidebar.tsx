@@ -8,6 +8,7 @@ import { MessageCircle, Send, ArrowLeft, Check, Database, Clock, Tag, ExternalLi
 import { ChatSidebar } from "@/components/layout/ChatSidebar";
 import { useChat } from "@/contexts/ChatContext";
 import { useRequests } from "@/hooks/useRequests";
+import { sendChatMessage } from "@/lib/llm";
 
 interface DataSuggestion {
   name: string;
@@ -49,7 +50,7 @@ interface RequestData {
   requestId: string;
 }
 
-type ConversationStep = 
+type ConversationStep =
   | 'welcome' 
   | 'initial' 
   | 'intention_detection'
@@ -61,6 +62,8 @@ type ConversationStep =
   | 'review_request'
   | 'confirmation'
   | 'follow_up';
+
+const SYSTEM_PROMPT = `Você é o Assistente de Dados. Auxilie usuários a consultar e solicitar dados disponíveis na companhia. Responda de forma breve e cite produtores quando possível.`;
 
 const DataAssistantWithSidebar = () => {
   const navigate = useNavigate();
@@ -159,16 +162,31 @@ const DataAssistantWithSidebar = () => {
     }, delay);
   };
 
-  const handleNewChat = () => {
+  const handleNewChat = async () => {
     const sessionId = createNewSession('Nova conversa');
     setCurrentStep('initial');
-    simulateTyping(() => {
-      addMessage({
-        type: 'assistant',
-        content: 'Olá! Me diga com o que você precisa de ajuda. Posso verificar se já temos algum dado pronto ou te ajudar a montar um pedido novo.',
-        quickReplies: ['🔍 Buscar dado existente', '🧾 Criar novo pedido', '❓ Tirar dúvida']
+
+    try {
+      const response = await sendChatMessage([
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: 'Inicie a conversa cumprimentando o usuário e explique como pode ajudar.' }
+      ]);
+      simulateTyping(() => {
+        addMessage({
+          type: 'assistant',
+          content: response,
+          quickReplies: ['🔍 Buscar dado existente', '🧾 Criar novo pedido', '❓ Tirar dúvida']
+        });
       });
-    });
+    } catch (e) {
+      simulateTyping(() => {
+        addMessage({
+          type: 'assistant',
+          content: 'Olá! Me diga com o que você precisa de ajuda. Posso verificar se já temos algum dado pronto ou te ajudar a montar um pedido novo.',
+          quickReplies: ['🔍 Buscar dado existente', '🧾 Criar novo pedido', '❓ Tirar dúvida']
+        });
+      });
+    }
   };
 
   const handleStartConversation = () => {
@@ -451,12 +469,29 @@ Posso te avisar quando estiver pronto?`,
     if (currentStep === 'intention_detection') {
       handleIntentionDetection(message);
     } else {
-      simulateTyping(() => {
-        addMessage({
-          type: 'assistant',
-          content: 'Entendi! Como posso ajudar você com isso?'
+      const history = [
+        ...currentSession.messages.map(m => ({ role: m.type === 'user' ? 'user' : 'assistant', content: m.content })),
+        { role: 'user', content: message }
+      ];
+      try {
+        const aiResponse = await sendChatMessage([
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...history
+        ]);
+        simulateTyping(() => {
+          addMessage({
+            type: 'assistant',
+            content: aiResponse
+          });
         });
-      });
+      } catch (e) {
+        simulateTyping(() => {
+          addMessage({
+            type: 'assistant',
+            content: 'Desculpe, ocorreu um erro ao acessar a IA.'
+          });
+        });
+      }
     }
   };
 
