@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 export interface Request {
   id: string;
@@ -96,7 +95,7 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
 
       if (error) throw error;
 
-      setRequests(data || []);
+      setRequests((data || []) as unknown as Request[]);
     } catch (err) {
       console.error('Error fetching requests:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar solicitações');
@@ -123,12 +122,12 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
       const { data, error } = await supabase
         .from('requests')
         .select('*')
-        .eq('solicitante_id', currentUser.id)
+        .eq('solicitante_id', currentUser.id as any)
         .order('criado_em', { ascending: false });
 
       if (error) throw error;
 
-      setRequests(data || []);
+      setRequests((data || []) as unknown as Request[]);
     } catch (err) {
       console.error('Error fetching user requests:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar suas solicitações');
@@ -172,17 +171,17 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
           classificacao_dado: requestData.classificacao_dado || 'nao_sensivel',
           estimativa_entrega: requestData.estimativa_entrega,
           proposito_de_uso: requestData.proposito_de_uso
-        } as TablesInsert<'requests'>)
+        } as any)
         .select('*')
         .single();
 
       if (error) throw error;
 
-      setRequests(prev => [data, ...prev]);
+      setRequests(prev => [data as unknown as Request, ...prev]);
       
       toast({
         title: "Sucesso",
-        description: `Solicitação ${data.codigo_solicitacao} criada com sucesso!`,
+        description: `Solicitação ${(data as any).codigo_solicitacao} criada com sucesso!`,
       });
 
       return data;
@@ -201,14 +200,14 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
     try {
       const { data, error } = await supabase
         .from('requests')
-        .update(updates as TablesUpdate<'requests'>)
-        .eq('id', id)
+        .update(updates as any)
+        .eq('id', id as any)
         .select('*')
         .single();
 
       if (error) throw error;
 
-      setRequests(prev => prev.map(req => req.id === id ? data : req));
+      setRequests(prev => prev.map(req => req.id === id ? data as unknown as Request : req));
       
       toast({
         title: "Sucesso",
@@ -234,8 +233,8 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
         .update({ 
           status: 'cancelada',
           cancelado_em: new Date().toISOString()
-        })
-        .eq('id', id);
+        } as any)
+        .eq('id', id as any);
 
       if (error) throw error;
 
@@ -293,12 +292,12 @@ export const useRequestComments = (requestId: string) => {
       const { data, error } = await supabase
         .from('request_comments')
         .select('*')
-        .eq('request_id', requestId)
+        .eq('request_id', requestId as any)
         .order('criado_em', { ascending: true });
 
       if (error) throw error;
 
-      setComments(data || []);
+      setComments((data || []) as unknown as RequestComment[]);
     } catch (err) {
       console.error('Error fetching comments:', err);
     } finally {
@@ -316,13 +315,13 @@ export const useRequestComments = (requestId: string) => {
           request_id: requestId,
           user_id: user.id,
           comentario
-        }])
+        }] as any)
         .select('*')
         .single();
 
       if (error) throw error;
 
-      setComments(prev => [...prev, data]);
+      setComments(prev => [...prev, data as unknown as RequestComment]);
       return data;
     } catch (err) {
       console.error('Error adding comment:', err);

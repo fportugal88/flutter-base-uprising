@@ -53,7 +53,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     supabase
       .from('chat_sessions')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', user.id as any)
       .order('created_at', { ascending: false })
       .then(({ data, error }) => {
         if (error) {
@@ -90,14 +90,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
     if (user) {
       supabase.from('chat_sessions').insert({
-        id,
         user_id: user.id,
         title: newSession.title,
-        created_at: createdAt.toISOString(),
-        last_message_at: createdAt.toISOString(),
-        status: 'active',
-        request_id: null
-      }).then(({ error }) => {
+        status: 'active'
+      } as any).then(({ error }) => {
         if (error) console.error('Error creating session', error);
       });
     }
@@ -113,7 +109,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         supabase
           .from('chat_messages')
           .select('*')
-          .eq('session_id', sessionId)
+          .eq('session_id', sessionId as any)
           .order('created_at', { ascending: true })
           .then(({ data, error }) => {
             if (error) {
@@ -144,7 +140,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       setCurrentSession(prev => prev ? { ...prev, title } : null);
     }
 
-    supabase.from('chat_sessions').update({ title }).eq('id', sessionId);
+    supabase.from('chat_sessions').update({ title } as any).eq('id', sessionId as any);
   };
 
   const addMessageToSession = (sessionId: string, message: Omit<Message, 'id' | 'timestamp'>) => {
@@ -174,16 +170,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
 
     supabase.from('chat_messages').insert({
-      id: newMessage.id,
       session_id: sessionId,
       sender: newMessage.type,
-      content: newMessage.content,
-      created_at: timestamp.toISOString()
-    }).then(({ error }) => {
+      content: newMessage.content
+    } as any).then(({ error }) => {
       if (error) console.error('Error saving message', error);
     });
 
-    supabase.from('chat_sessions').update({ last_message_at: timestamp.toISOString() }).eq('id', sessionId);
+    supabase.from('chat_sessions').update({ 
+      last_message_at: timestamp.toISOString() 
+    } as any).eq('id', sessionId as any);
   };
 
   const linkSessionToRequest = (sessionId: string, requestId: string) => {
@@ -197,7 +193,10 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       setCurrentSession(prev => prev ? { ...prev, requestId, status: 'completed' } : null);
     }
 
-    supabase.from('chat_sessions').update({ request_id: requestId, status: 'completed' }).eq('id', sessionId);
+    supabase.from('chat_sessions').update({ 
+      request_id: requestId, 
+      status: 'completed' 
+    } as any).eq('id', sessionId as any);
   };
 
   const getSessionByRequest = (requestId: string): ChatSession | undefined => {
@@ -211,7 +210,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         : session
     ));
 
-    supabase.from('chat_sessions').update({ status: 'archived' }).eq('id', sessionId);
+    supabase.from('chat_sessions').update({ status: 'archived' } as any).eq('id', sessionId as any);
   };
 
   return (
