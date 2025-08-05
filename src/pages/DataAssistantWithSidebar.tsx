@@ -471,8 +471,8 @@ Posso te avisar quando estiver pronto?`,
       handleIntentionDetection(message);
     } else {
       const history = [
-        ...currentSession.messages.map(m => ({ role: m.type === 'user' ? 'user' : 'assistant', content: m.content })),
-        { role: 'user', content: message }
+        ...currentSession.messages.map(m => ({ role: m.type === 'user' ? 'user' as const : 'assistant' as const, content: m.content })),
+        { role: 'user' as const, content: message }
       ];
       try {
         const aiResponse = await sendChatMessage([
@@ -510,11 +510,13 @@ Posso te avisar quando estiver pronto?`,
         
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <div className="flex items-center p-3 sm:p-4 border-b bg-card">
-            <Button variant="ghost" size="icon" className="mr-2 sm:mr-3 md:hidden" onClick={() => navigate('/')}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground">Assistente de Dados</h1>
+          <div className="flex items-center justify-between p-4 border-b bg-card">
+            <div className="flex items-center min-w-0 flex-1">
+              <Button variant="ghost" size="icon" className="mr-3 flex-shrink-0" onClick={() => navigate('/')}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <h1 className="text-lg sm:text-xl font-semibold text-foreground">Assistente de Dados</h1>
+            </div>
           </div>
 
           {/* Welcome Content */}
@@ -548,11 +550,13 @@ Posso te avisar quando estiver pronto?`,
       
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="flex items-center p-3 sm:p-4 border-b bg-card">
-          <Button variant="ghost" size="icon" className="mr-2 sm:mr-3 md:hidden" onClick={() => navigate('/')}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-foreground truncate">{currentSession.title}</h1>
+        <div className="flex items-center justify-between p-4 border-b bg-card">
+          <div className="flex items-center min-w-0 flex-1">
+            <Button variant="ghost" size="icon" className="mr-3 flex-shrink-0" onClick={() => navigate('/')}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-lg sm:text-xl font-semibold text-foreground truncate">{currentSession.title}</h1>
+          </div>
         </div>
 
         {/* Messages */}
