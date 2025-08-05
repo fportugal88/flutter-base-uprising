@@ -18,7 +18,7 @@ async function getApiKey(): Promise<string | null> {
       .select('encrypted_key')
       .eq('user_id', user.id)
       .eq('provider', 'openai')
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
       return null;

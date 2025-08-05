@@ -29,9 +29,9 @@ export const useApiKeys = () => {
         .select('*')
         .eq('user_id', user.id)
         .eq('provider', 'openai')
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error checking API key:', error);
         return;
       }
@@ -87,7 +87,7 @@ export const useApiKeys = () => {
         .select('encrypted_key')
         .eq('user_id', user.id)
         .eq('provider', provider)
-        .single();
+        .maybeSingle();
 
       if (error || !data) {
         return null;
