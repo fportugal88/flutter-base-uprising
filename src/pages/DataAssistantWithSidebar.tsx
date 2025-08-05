@@ -197,7 +197,7 @@ const DataAssistantWithSidebar = () => {
     } else {
       setCurrentStep('initial');
       simulateTyping(() => {
-        addMessage({
+        addMessageToSession(currentSession.id, {
           type: 'assistant',
           content: 'Olá! Me diga com o que você precisa de ajuda. Posso verificar se já temos algum dado pronto ou te ajudar a montar um pedido novo.',
           quickReplies: ['🔍 Buscar dado existente', '🧾 Criar novo pedido', '❓ Tirar dúvida']
@@ -210,7 +210,7 @@ const DataAssistantWithSidebar = () => {
     if (reply.includes('Criar novo pedido')) {
       setCurrentStep('intention_detection');
       simulateTyping(() => {
-        addMessage({
+        addMessageToSession(currentSession.id, {
           type: 'assistant',
           content: 'Perfeito! Agora me conte: qual tipo de informação você precisa? Pode ser bem específico.',
           quickReplies: ['Ticket médio por região', 'Base de clientes inativos', 'Abandono de carrinho', 'Outro - vou digitar']

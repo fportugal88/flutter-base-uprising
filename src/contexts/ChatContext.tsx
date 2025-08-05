@@ -89,13 +89,19 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setSessions(prev => [newSession, ...prev]);
     setCurrentSession(newSession);
 
+    // Salvar sessão no banco de dados
     if (user) {
       supabase.from('chat_sessions').insert({
+        id,
         user_id: user.id,
         title: newSession.title,
         status: 'active'
       } as any).then(({ error }) => {
-        if (error) console.error('Error creating session', error);
+        if (error) {
+          console.error('Error creating session', error);
+        } else {
+          console.log('Session created successfully:', id);
+        }
       });
     }
 
