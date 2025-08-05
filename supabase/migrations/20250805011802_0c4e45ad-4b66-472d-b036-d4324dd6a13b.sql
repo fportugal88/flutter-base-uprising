@@ -1,0 +1,92 @@
+-- Inserir solicitações de exemplo para teste (versão corrigida)
+INSERT INTO public.requests (
+    titulo,
+    descricao,
+    status,
+    prioridade,
+    categoria,
+    origem_canal,
+    solicitante_id,
+    equipe_solicitante,
+    justificativa_negocio,
+    impacto_estimado,
+    classificacao_dado
+) VALUES 
+(
+    'Análise de Ticket Médio por Região',
+    'Preciso de uma análise detalhada do ticket médio de vendas segmentado por região geográfica para otimizar campanhas de marketing regional. Os dados devem incluir tendências dos últimos 12 meses.',
+    'em_desenvolvimento',
+    'alta',
+    ARRAY['Vendas', 'Regional', 'Marketing'],
+    'chat',
+    (SELECT id FROM auth.users LIMIT 1),
+    'Equipe de CRM',
+    'Identificar regiões com maior potencial de crescimento e ajustar estratégias de pricing regional',
+    'alto',
+    'nao_sensivel'
+),
+(
+    'Base de Clientes Inativos',
+    'Base consolidada de clientes que não fizeram compras nos últimos 6 meses, incluindo análise de motivos de churn baseada em interações de suporte.',
+    'pendente',
+    'normal',
+    ARRAY['Clientes', 'Churn', 'Retenção'],
+    'chat',
+    (SELECT id FROM auth.users LIMIT 1),
+    'Customer Success',
+    'Desenvolver estratégias de reativação de clientes e reduzir taxa de churn',
+    'medio',
+    'PII'
+),
+(
+    'Dashboard de Abandono de Carrinho',
+    'Dashboard interativo mostrando taxa de abandono de carrinho segmentado por categoria de produto, horário do dia e dispositivo utilizado.',
+    'concluida',
+    'normal',
+    ARRAY['E-commerce', 'Conversão', 'UX'],
+    'chat',
+    (SELECT id FROM auth.users LIMIT 1),
+    'Product Analytics',
+    'Otimizar fluxo de checkout e reduzir abandono de carrinho',
+    'medio',
+    'nao_sensivel'
+),
+(
+    'Relatório de Performance Semanal',
+    'Relatório automatizado com métricas de performance de vendas, marketing e produto enviado semanalmente para stakeholders.',
+    'cancelada',
+    'baixa',
+    ARRAY['Performance', 'Automação', 'Relatórios'],
+    'chat',
+    (SELECT id FROM auth.users LIMIT 1),
+    'Business Intelligence',
+    'Automatizar reporting semanal e liberar tempo da equipe de BI',
+    'baixo',
+    'nao_sensivel'
+),
+(
+    'Análise de Rentabilidade por SKU',
+    'Análise detalhada de rentabilidade por SKU incluindo custos de aquisição, armazenagem, logística e margem líquida.',
+    'em_curadoria',
+    'alta',
+    ARRAY['Financeiro', 'Produto', 'Rentabilidade'],
+    'chat',
+    (SELECT id FROM auth.users LIMIT 1),
+    'Controladoria',
+    'Otimizar mix de produtos e identificar SKUs para descontinuar ou promover',
+    'estrategico',
+    'financeiro'
+),
+(
+    'Segmentação de Clientes por CLV',
+    'Segmentação avançada de base de clientes baseada em CLV, frequência de compra, ticket médio e tendência de crescimento.',
+    'pendente',
+    'urgente',
+    ARRAY['Clientes', 'CLV', 'Segmentação'],
+    'chat',
+    (SELECT id FROM auth.users LIMIT 1),
+    'Data Science',
+    'Personalizar estratégias de marketing e pricing baseado no valor do cliente',
+    'estrategico',
+    'PII'
+);
