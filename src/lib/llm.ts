@@ -11,7 +11,10 @@ const SECRET = 'fusion_data_bridge_secret_key';
 async function getApiKey(): Promise<string | null> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
+    if (!user) {
+      console.error('User not authenticated');
+      return null;
+    }
 
     const { data, error } = await supabase
       .from('user_api_keys')

@@ -20,7 +20,10 @@ export const useApiKeys = () => {
 
   // Check if user has OpenAI key
   const checkForOpenAIKey = async () => {
-    if (!user) return;
+    if (!user) {
+      setHasOpenAIKey(false);
+      return;
+    }
     
     setLoading(true);
     try {
@@ -33,6 +36,7 @@ export const useApiKeys = () => {
 
       if (error) {
         console.error('Error checking API key:', error);
+        setHasOpenAIKey(false);
         return;
       }
 
@@ -46,7 +50,10 @@ export const useApiKeys = () => {
 
   // Save API key
   const saveApiKey = async (provider: string, apiKey: string) => {
-    if (!user || !apiKey) return false;
+    if (!user || !apiKey) {
+      console.error('User not authenticated or API key empty');
+      return false;
+    }
 
     setLoading(true);
     try {
@@ -79,7 +86,10 @@ export const useApiKeys = () => {
 
   // Get API key (decrypted)
   const getApiKey = async (provider: string): Promise<string | null> => {
-    if (!user) return null;
+    if (!user) {
+      console.error('User not authenticated');
+      return null;
+    }
 
     try {
       const { data, error } = await supabase
@@ -104,7 +114,10 @@ export const useApiKeys = () => {
 
   // Remove API key
   const removeApiKey = async (provider: string) => {
-    if (!user) return false;
+    if (!user) {
+      console.error('User not authenticated');
+      return false;
+    }
 
     setLoading(true);
     try {
