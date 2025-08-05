@@ -2,16 +2,17 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, Plus, Archive, Clock, CheckCircle } from 'lucide-react';
+import { MessageCircle, Trash2, Archive, Clock, CheckCircle, MoreVertical } from 'lucide-react';
 import { useChat } from '@/contexts/ChatContext';
 import { cn } from '@/lib/utils';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface ChatSidebarProps {
   onNewChat: () => void;
 }
 
 export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
-  const { sessions, currentSession, loadSession } = useChat();
+  const { sessions, currentSession, loadSession, deleteSession } = useChat();
 
   const activeSessions = sessions.filter(s => s.status === 'active' || s.status === 'completed');
 
@@ -40,18 +41,16 @@ export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
     return date.toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' });
   };
 
+  const handleDeleteSession = async (sessionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    await deleteSession(sessionId);
+  };
+
   return (
-    <div className="hidden md:flex w-64 lg:w-80 bg-card border-r border-border flex-col h-full">
+    <div className="w-64 lg:w-80 bg-card border-r border-border flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-border">
-        <Button 
-          onClick={onNewChat}
-          className="w-full justify-start"
-          size="sm"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Nova conversa
-        </Button>
+        <h3 className="text-sm font-semibold text-foreground">Conversas</h3>
       </div>
 
       {/* Chat List */}
@@ -64,7 +63,7 @@ export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
                 Nenhuma conversa ainda
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Clique em "Nova conversa" para começar
+                Inicie uma conversa para ver o histórico aqui
               </p>
             </div>
           ) : (
@@ -75,14 +74,14 @@ export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
                   className={cn(
                     "group relative p-3 rounded-lg cursor-pointer transition-colors",
                     "hover:bg-accent/50",
-                    currentSession?.id === session.id 
+                    currentSession?.id === session.id
                       ? "bg-accent text-accent-foreground" 
                       : "text-foreground"
                   )}
                   onClick={() => loadSession(session.id)}
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h4 className="text-sm font-medium truncate pr-2">
+                    <h4 className="text-sm font-medium truncate pr-2 flex-1">
                       {session.title}
                     </h4>
                     <div className="flex items-center gap-1">
@@ -90,6 +89,22 @@ export function ChatSidebar({ onNewChat }: ChatSidebarProps) {
                       <span className="text-xs text-muted-foreground">
                         {formatDate(session.lastMessage)}
                       </span>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100">
+                            <MoreVertical className="h-3 w-3" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem 
+                            onClick={(e) => handleDeleteSession(session.id, e)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Excluir conversa
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                   

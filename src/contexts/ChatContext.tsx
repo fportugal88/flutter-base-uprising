@@ -34,6 +34,7 @@ interface ChatContextType {
   linkSessionToRequest: (sessionId: string, requestId: string) => void;
   getSessionByRequest: (requestId: string) => ChatSession | undefined;
   archiveSession: (sessionId: string) => void;
+  deleteSession: (sessionId: string) => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -213,6 +214,32 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     supabase.from('chat_sessions').update({ status: 'archived' } as any).eq('id', sessionId as any);
   };
 
+  const deleteSession = async (sessionId: string) => {
+    try {
+      // Delete messages first (foreign key constraint)
+      await supabase
+        .from('chat_messages')
+        .delete()
+        .eq('session_id', sessionId);
+
+      // Delete session
+      await supabase
+        .from('chat_sessions')
+        .delete()
+        .eq('id', sessionId);
+
+      // Update local state
+      setSessions(prev => prev.filter(s => s.id !== sessionId));
+      
+      // If deleting active session, clear it
+      if (currentSession?.id === sessionId) {
+        setCurrentSession(null);
+      }
+    } catch (error) {
+      console.error('Error deleting session:', error);
+    }
+  };
+
   return (
     <ChatContext.Provider value={{
       sessions,
@@ -223,7 +250,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       addMessageToSession,
       linkSessionToRequest,
       getSessionByRequest,
-      archiveSession
+      archiveSession,
+      deleteSession
     }}>
       {children}
     </ChatContext.Provider>
