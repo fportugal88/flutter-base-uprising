@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -244,7 +246,15 @@ const DataAssistantWithSidebar = () => {
                     : 'bg-card border-border'
                 }`}>
                   <CardContent className="p-3">
-                    <p className="text-body-medium whitespace-pre-line">{message.content}</p>
+                    {message.type === 'assistant' ? (
+                      <div className="prose prose-sm max-w-none dark:prose-invert">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {message.content}
+                        </ReactMarkdown>
+                      </div>
+                    ) : (
+                      <p className="text-body-medium whitespace-pre-line">{message.content}</p>
+                    )}
                   </CardContent>
                 </Card>
                 
