@@ -62,7 +62,12 @@ const DataAssistantWithSidebar = () => {
   };
 
   const handleNewChat = async () => {
-    const sessionId = createNewSession('Nova descoberta');
+    try {
+      await createNewSession('Nova descoberta');
+    } catch (e) {
+      console.error('Erro ao criar sessão:', e);
+      return;
+    }
 
     try {
       const response = await sendChatMessage([
