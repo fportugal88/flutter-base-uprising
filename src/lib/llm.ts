@@ -28,17 +28,28 @@ export async function sendChatMessage(messages: LLMMessage[]): Promise<string> {
     console.log('sendChatMessage: retrieving API key...');
     const apiKey = await getOpenAIApiKey();
 
-    console.log('sendChatMessage: calling OpenAI...');
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    console.log('sendChatMessage: loading assistant instructions...');
+    const instructionsUrl =
+      import.meta.env.VITE_ASSISTANT_INSTRUCTIONS_URL ||
+      '/assistant-instructions.md';
+    const instructionsRes = await fetch(instructionsUrl);
+    if (!instructionsRes.ok) {
+      throw new Error('Failed to load assistant instructions');
+    }
+    const instructions = await instructionsRes.text();
+
+    console.log('sendChatMessage: calling OpenAI responses API...');
+    const response = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages,
-        max_tokens: 1000,
+        model: 'gpt-4.1-mini',
+        input: messages,
+        instructions,
+        max_output_tokens: 1000,
         temperature: 0.7,
       }),
     });
@@ -50,7 +61,7 @@ export async function sendChatMessage(messages: LLMMessage[]): Promise<string> {
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content?.trim();
+    const content = data.output_text?.trim();
 
     if (!content) {
       console.error('sendChatMessage: no content in response', data);

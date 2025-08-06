@@ -60,6 +60,13 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Assistant Instructions
+
+O comportamento do assistente pode ser personalizado editando o arquivo
+[`public/assistant-instructions.md`](public/assistant-instructions.md). Este
+arquivo em Markdown é carregado em tempo de execução e suas alterações no GitHub
+afetam imediatamente as respostas do assistente.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/ee506ff2-f35d-4130-9ddb-fd3727716c89) and click on Share -> Publish.
