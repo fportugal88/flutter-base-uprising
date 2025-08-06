@@ -89,19 +89,34 @@ serve(async (req) => {
       );
     }
 
-    console.log('Making OpenAI API call...');
-    
+    console.log('Loading assistant instructions...');
+    const instructionsUrl =
+      Deno.env.get('ASSISTANT_INSTRUCTIONS_URL') ||
+      'https://raw.githubusercontent.com/OWNER/REPO/main/public/assistant-instructions.md';
+    let instructions = '';
+    try {
+      const instructionsRes = await fetch(instructionsUrl);
+      if (instructionsRes.ok) {
+        instructions = await instructionsRes.text();
+      }
+    } catch (e) {
+      console.error('Failed to load instructions:', e);
+    }
+
+    console.log('Making OpenAI responses API call...');
+
     // Fazer chamada para OpenAI
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${openaiApiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages,
-        max_tokens: maxTokens,
+        model: 'gpt-4.1-mini',
+        input: messages,
+        instructions,
+        max_output_tokens: maxTokens,
         temperature: 0.7,
       }),
     });
@@ -122,7 +137,7 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content?.trim() || '';
+    const content = data.output_text?.trim() || '';
     
     console.log('OpenAI response received successfully');
     
