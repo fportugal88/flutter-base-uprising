@@ -15,10 +15,5 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   },
   db: {
     schema: 'api'
-  },
-  global: {
-    headers: {
-      'Accept-Profile': 'api'
-    }
   }
 }) as any;
