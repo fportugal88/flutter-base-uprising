@@ -1,4 +1,4 @@
 project_id = "bqkmmyjqcazjldicxddn"
 
-[functions.get-secret]
+[functions.chat-openai]
 verify_jwt = false
