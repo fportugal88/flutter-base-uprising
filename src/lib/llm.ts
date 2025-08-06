@@ -11,7 +11,7 @@ export async function sendChatMessage(messages: LLMMessage[]): Promise<string> {
   try {
     console.log('sendChatMessage: invoking chat-openai function...');
 
-    const assistantId = import.meta.env.VITE_ASSISTANT_ID;
+    const assistantId = "asst_Oh75yptf7Tj8hLDVJJ2o9CqC";
     if (!assistantId) {
       throw new Error('Assistant ID not configured');
     }
