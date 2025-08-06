@@ -60,12 +60,14 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## Assistant Instructions
+## Assistant Configuration
 
-O comportamento do assistente pode ser personalizado editando o arquivo
-[`public/assistant-instructions.md`](public/assistant-instructions.md). Este
-arquivo em Markdown é carregado em tempo de execução e suas alterações no GitHub
-afetam imediatamente as respostas do assistente.
+O comportamento do assistente agora é definido através de um Assistente criado
+no painel da OpenAI. Configure o seu assistente e informe o seu identificador
+nas variáveis de ambiente `VITE_ASSISTANT_ID` (aplicação web) e `ASSISTANT_ID`
+(função do Supabase). O arquivo
+[`public/assistant-instructions.md`](public/assistant-instructions.md) não é
+mais utilizado.
 
 ## How can I deploy this project?
 

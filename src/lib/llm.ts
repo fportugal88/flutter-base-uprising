@@ -27,16 +27,10 @@ export async function sendChatMessage(messages: LLMMessage[]): Promise<string> {
   try {
     console.log('sendChatMessage: retrieving API key...');
     const apiKey = await getOpenAIApiKey();
-
-    console.log('sendChatMessage: loading assistant instructions...');
-    const instructionsUrl =
-      import.meta.env.VITE_ASSISTANT_INSTRUCTIONS_URL ||
-      '/assistant-instructions.md';
-    const instructionsRes = await fetch(instructionsUrl);
-    if (!instructionsRes.ok) {
-      throw new Error('Failed to load assistant instructions');
+    const assistantId = import.meta.env.VITE_ASSISTANT_ID;
+    if (!assistantId) {
+      throw new Error('Assistant ID not configured');
     }
-    const instructions = await instructionsRes.text();
 
     console.log('sendChatMessage: calling OpenAI responses API...');
     const response = await fetch('https://api.openai.com/v1/responses', {
@@ -46,9 +40,8 @@ export async function sendChatMessage(messages: LLMMessage[]): Promise<string> {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-mini',
+        assistant_id: assistantId,
         input: messages,
-        instructions,
         max_output_tokens: 1000,
         temperature: 0.7,
       }),
