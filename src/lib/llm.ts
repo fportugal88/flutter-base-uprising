@@ -9,23 +9,69 @@ export async function sendChatMessage(messages: LLMMessage[]): Promise<string> {
   console.log('sendChatMessage: starting...');
 
   try {
-    console.log('sendChatMessage: invoking get-secret function...');
+    console.log('sendChatMessage: fetching OpenAI API key...');
 
-    const assistantId = "asst_Oh75yptf7Tj8hLDVJJ2o9CqC";
-    if (!assistantId) {
-      throw new Error('Assistant ID not configured');
-    }
-
-    const { data, error } = await supabase.functions.invoke('get-secret', {
-      body: { messages, assistantId }
+    const { data: secret, error: secretError } = await supabase.functions.invoke('get-secret', {
+      body: { name: 'OPENAI_API_KEY' }
     });
 
-    if (error) {
-      console.error('sendChatMessage: function error', error);
-      throw new Error(error.message);
+    if (secretError) {
+      console.error('sendChatMessage: secret function error', secretError);
+      throw new Error(secretError.message);
     }
 
-    const content = data?.content?.trim();
+    const openaiApiKey = secret?.value;
+    if (!openaiApiKey) {
+      console.error('sendChatMessage: no API key returned', secret);
+      throw new Error('OpenAI API key not found');
+    }
+
+    console.log('sendChatMessage: fetching assistant ID...');
+
+    const { data: assistantData, error: assistantError } = await supabase.functions.invoke(
+      'get-assistant-discovery'
+    );
+
+    if (assistantError) {
+      console.error('sendChatMessage: assistant function error', assistantError);
+      throw new Error(assistantError.message);
+    }
+
+    const assistantId =
+      assistantData?.assistantId || assistantData?.assistant_id || assistantData?.id;
+
+    if (!assistantId) {
+      console.error('sendChatMessage: no assistant ID returned', assistantData);
+      throw new Error('Assistant ID not found');
+    }
+
+    console.log('sendChatMessage: calling OpenAI API...');
+
+    const response = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${openaiApiKey}`,
+      },
+      body: JSON.stringify({
+        assistant_id: assistantId,
+        input: messages,
+        max_output_tokens: 1000,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('sendChatMessage: OpenAI API error', response.status, errorText);
+      throw new Error('Failed to get response from OpenAI');
+    }
+
+    const data = await response.json();
+    const content =
+      data?.output_text?.trim() ??
+      data?.output?.[0]?.content?.[0]?.text?.value?.trim() ??
+      data?.output?.[0]?.content?.[0]?.text?.trim();
 
     if (!content) {
       console.error('sendChatMessage: no content in response', data);

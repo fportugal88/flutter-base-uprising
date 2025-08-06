@@ -52,9 +52,8 @@ async function main() {
     if (fs.existsSync(envPath)) {
       envContent = fs.readFileSync(envPath, 'utf8');
     }
-    envContent = envContent.replace(/ASSISTANT_ID=.*/g, '')
-                           .replace(/VITE_ASSISTANT_ID=.*/g, '');
-    envContent += `\nASSISTANT_ID=${assistantId}\nVITE_ASSISTANT_ID=${assistantId}\n`;
+    envContent = envContent.replace(/ASSISTANT_ID=.*/g, '');
+    envContent += `\nASSISTANT_ID=${assistantId}\n`;
     fs.writeFileSync(envPath, envContent.trim() + '\n');
     console.log('Assistant created. ID stored in .env:', assistantId);
   }
