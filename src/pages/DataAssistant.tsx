@@ -478,7 +478,7 @@ Posso te avisar quando estiver pronto?`,
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSendMessage();
     }
@@ -823,7 +823,7 @@ Posso te avisar quando estiver pronto?`,
             ref={inputRef}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             placeholder={
               currentStep === 'intention_detection' 
                 ? "Descreva que tipo de dado você precisa..." 
