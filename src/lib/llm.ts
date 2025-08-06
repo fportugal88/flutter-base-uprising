@@ -9,50 +9,27 @@ async function getApiKey(): Promise<string | null> {
   try {
     console.log('llm.getApiKey: starting...');
     
-    // Primeiro, tentar buscar do localStorage como fallback
-    const localKey = localStorage.getItem('openai_api_key');
-    if (localKey) {
-      console.log('llm.getApiKey: using localStorage API key');
-      return localKey;
-    }
-    
     console.log('llm.getApiKey: fetching OPENAI_API_KEY from Supabase secrets...');
-    try {
-      const { data, error } = await supabase.functions.invoke('get-secret', {
-        body: { name: 'OPENAI_API_KEY' }
-      });
+    const { data, error } = await supabase.functions.invoke('get-secret', {
+      body: { name: 'OPENAI_API_KEY' }
+    });
 
-      if (error) {
-        console.error('llm.getApiKey: error getting secret from Supabase', error);
-        // Se falhar, solicitar ao usuário
-        console.log('llm.getApiKey: Edge Function failed, requesting API key from user');
-        return requestApiKeyFromUser();
-      }
-
-      if (!data?.value) {
-        console.error('llm.getApiKey: no API key found in Supabase secrets');
-        return requestApiKeyFromUser();
-      }
-
-      console.log('llm.getApiKey: API key retrieved successfully from Supabase');
-      return data.value;
-    } catch (functionError) {
-      console.error('llm.getApiKey: Edge Function error', functionError);
-      return requestApiKeyFromUser();
+    if (error) {
+      console.error('llm.getApiKey: error getting secret', error);
+      return null;
     }
-  } catch (error) {
-    console.error('llm.getApiKey: general exception', error);
-    return requestApiKeyFromUser();
-  }
-}
 
-function requestApiKeyFromUser(): string | null {
-  const userKey = prompt('Por favor, insira sua chave da API do OpenAI:');
-  if (userKey) {
-    localStorage.setItem('openai_api_key', userKey);
-    return userKey;
+    if (!data?.value) {
+      console.error('llm.getApiKey: no API key found in secrets');
+      return null;
+    }
+
+    console.log('llm.getApiKey: API key retrieved successfully');
+    return data.value;
+  } catch (error) {
+    console.error('llm.getApiKey: exception', error);
+    return null;
   }
-  return null;
 }
 
 export async function sendChatMessage(messages: LLMMessage[]): Promise<string> {

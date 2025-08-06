@@ -11,6 +11,7 @@ import { useChat } from "@/contexts/ChatContext";
 import { sendChatMessage } from "@/lib/llm";
 import type { Message as ChatMessage } from "@/contexts/ChatContext";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { ApiKeyStatus } from "@/components/ApiKeyStatus";
 
 const SYSTEM_PROMPT = `Você é um assistente de IA útil e amigável. Responda de forma clara e objetiva às perguntas dos usuários.`;
 
@@ -182,6 +183,11 @@ const DataAssistantWithSidebar = () => {
                 <p className="text-sm sm:text-base text-muted-foreground max-w-sm mx-auto">
                   Transforme perguntas em respostas. Solicite, explore e ganhe tempo com dados inteligentes.
                 </p>
+              </div>
+
+              {/* Status da API Key */}
+              <div className="mb-6 w-full max-w-2xl">
+                <ApiKeyStatus />
               </div>
 
               <Button 
