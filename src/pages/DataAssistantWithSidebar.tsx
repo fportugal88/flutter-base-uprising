@@ -7,12 +7,11 @@ import { MessageList } from "@/components/chat/MessageList";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { ChatSidebar } from "@/components/layout/ChatSidebar";
 import { useChat } from "@/contexts/ChatContext";
-import { sendChatMessage } from "@/lib/llm";
 import { logError } from "@/lib/logger";
 import type { Message as ChatMessage } from "@/contexts/ChatContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 
-const SYSTEM_PROMPT = `Você é um assistente de IA útil e amigável. Responda de forma clara e objetiva às perguntas dos usuários.`;
+
 
 const DataAssistantWithSidebar = () => {
   const navigate = useNavigate();
@@ -63,30 +62,16 @@ const DataAssistantWithSidebar = () => {
   const handleNewChat = async () => {
     try {
       await createNewSession('Nova descoberta');
-    } catch (e) {
-      console.error('Erro ao criar sessão:', e);
-      return;
-    }
-
-    try {
-      const response = await sendChatMessage([
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: 'Inicie a conversa cumprimentando o usuário.' }
-      ]);
-      simulateTyping(() => {
-        addMessage({
-          type: 'assistant',
-          content: response
-        });
-      });
-    } catch (e) {
-      logError('Erro ao chamar OpenAI:', e);
+      
+      // Adiciona mensagem de boas-vindas do assistente
       simulateTyping(() => {
         addMessage({
           type: 'assistant',
           content: 'Olá! Sou seu assistente de IA. Como posso ajudá-lo hoje?'
         });
       });
+    } catch (e) {
+      console.error('Erro ao criar sessão:', e);
     }
   };
 
@@ -104,38 +89,19 @@ const DataAssistantWithSidebar = () => {
     const message = inputValue.trim();
     setInputValue('');
 
+    // Salva mensagem do usuário
     addMessage({
       type: 'user',
       content: message
     });
 
-    // Get conversation history
-    const history = currentSession.messages.map(m => ({ 
-      role: m.type === 'user' ? 'user' as const : 'assistant' as const, 
-      content: m.content 
-    }));
-
-    try {
-      setIsTyping(true);
-      const aiResponse = await sendChatMessage([
-        { role: 'system', content: SYSTEM_PROMPT },
-        ...history,
-        { role: 'user', content: message }
-      ]);
-      
-      setIsTyping(false);
+    // Simula resposta do assistente
+    simulateTyping(() => {
       addMessage({
         type: 'assistant',
-        content: aiResponse
+        content: 'Mensagem recebida e salva no banco! Em breve conectaremos com IA.'
       });
-    } catch (e) {
-      logError('Erro ao chamar OpenAI:', e);
-      setIsTyping(false);
-      addMessage({
-        type: 'assistant',
-        content: 'Desculpe, ocorreu um erro ao processar sua mensagem. Tente novamente em alguns instantes.'
-      });
-    }
+    });
   };
 
   // Show welcome screen if no session
