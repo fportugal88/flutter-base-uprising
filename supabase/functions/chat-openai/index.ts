@@ -136,7 +136,7 @@ serve(async (req) => {
       );
     }
 
-    const assistantId = bodyAssistantId || Deno.env.get('ASSISTANT_ID');
+    const assistantId = bodyAssistantId || Deno.env.get('ASSISTENT_DISCOVERY');
     if (!assistantId) {
       console.error('Assistant ID not configured');
       return new Response(
