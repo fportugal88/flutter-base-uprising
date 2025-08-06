@@ -12,7 +12,7 @@ async function main() {
   const instructionsPath = path.join(process.cwd(), 'public', 'assistant-instructions.md');
   const instructions = fs.readFileSync(instructionsPath, 'utf8');
 
-  let assistantId = process.env.ASSISTANT_ID;
+  let assistantId = "asst_Oh75yptf7Tj8hLDVJJ2o9CqC";
 
   const headers = {
     'Content-Type': 'application/json',
