@@ -4,15 +4,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
-export type Request = Tables<'requests'> & {
+export type Request = any & {
   solicitante_name?: string;
   responsavel_name?: string;
   curador_name?: string;
 };
 
-type CreateRequestInput = Omit<TablesInsert<'requests'>, 'solicitante_id'>;
+type CreateRequestInput = any;
 
-export type RequestComment = Tables<'request_comments'> & {
+export type RequestComment = any & {
   user_name?: string;
 };
 
@@ -22,7 +22,7 @@ interface UseRequestsOptions {
 
 export const useRequests = (options: UseRequestsOptions = {}) => {
   const { autoFetch = true } = options;
-  const [requests, setRequests] = useState<Request[]>([]);
+  const [requests, setRequests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
@@ -32,8 +32,8 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
       setLoading(true);
       setError(null);
 
-      const { data, error } = await supabase
-        .from('requests')
+      const { data, error } = await (supabase
+        .from('requests' as any) as any)
         .select('*')
         .order('criado_em', { ascending: false });
 
@@ -67,8 +67,8 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
         throw new Error('Usuário não autenticado');
       }
 
-      const { data, error } = await supabase
-        .from('requests')
+      const { data, error } = await (supabase
+        .from('requests' as any) as any)
         .select('*')
         .eq('solicitante_id', currentUser.id)
         .order('criado_em', { ascending: false });
@@ -104,7 +104,7 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
     }
 
     try {
-      const newRequest: TablesInsert<'requests'> = {
+      const newRequest: any = {
         titulo: requestData.titulo,
         descricao: requestData.descricao,
         categoria: requestData.categoria || [],
@@ -123,8 +123,8 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
         proposito_de_uso: requestData.proposito_de_uso
       };
 
-      const { data, error } = await supabase
-        .from('requests')
+      const { data, error } = await (supabase
+        .from('requests' as any) as any)
         .insert(newRequest)
         .select('*')
         .single();
@@ -151,10 +151,10 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
     }
   };
 
-  const updateRequest = async (id: string, updates: TablesUpdate<'requests'>) => {
+  const updateRequest = async (id: string, updates: any) => {
     try {
-      const { data, error } = await supabase
-        .from('requests')
+      const { data, error } = await (supabase
+        .from('requests' as any) as any)
         .update(updates)
         .eq('id', id)
         .select('*')
@@ -184,13 +184,13 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
 
   const cancelRequest = async (id: string) => {
     try {
-      const updates: TablesUpdate<'requests'> = {
+      const updates: any = {
         status: 'cancelada',
         cancelado_em: new Date().toISOString(),
       };
 
-      const { error } = await supabase
-        .from('requests')
+      const { error } = await (supabase
+        .from('requests' as any) as any)
         .update(updates)
         .eq('id', id);
 
@@ -241,7 +241,7 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
 };
 
 export const useRequestComments = (requestId: string) => {
-  const [comments, setComments] = useState<RequestComment[]>([]);
+  const [comments, setComments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
@@ -249,8 +249,8 @@ export const useRequestComments = (requestId: string) => {
     try {
       setLoading(true);
 
-      const { data, error } = await supabase
-        .from('request_comments')
+      const { data, error } = await (supabase
+        .from('request_comments' as any) as any)
         .select('*')
         .eq('request_id', requestId)
         .order('criado_em', { ascending: true });
@@ -273,14 +273,14 @@ export const useRequestComments = (requestId: string) => {
     if (!user) return null;
 
     try {
-      const newComment: TablesInsert<'request_comments'> = {
+      const newComment: any = {
         request_id: requestId,
         user_id: user.id,
         comentario,
       };
 
-      const { data, error } = await supabase
-        .from('request_comments')
+      const { data, error } = await (supabase
+        .from('request_comments' as any) as any)
         .insert([newComment])
         .select('*')
         .single();

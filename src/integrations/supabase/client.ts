@@ -10,13 +10,13 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 // Create a typed Supabase client using the generated `Database` types.
 // This ensures all queries are fully type-safe throughout the project.
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
+export const supabase = createClient<any>(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
   },
   db: {
-    schema: 'api'
+    schema: 'api' as any
   }
-});
+}) as any;

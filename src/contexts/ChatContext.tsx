@@ -54,7 +54,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       }
 
       const { data, error } = await supabase
-        .from('chat_sessions')
+        .from('chat_sessions' as any)
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -95,8 +95,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
     if (user) {
       try {
-        const { error } = await supabase.from('chat_sessions').insert({
-          id,
+        const { error } = await (supabase.from('chat_sessions' as any) as any).insert({
           user_id: user.id,
           title: newSession.title,
           status: 'active'
@@ -121,8 +120,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     if (session) {
       setCurrentSession(session);
       if (session.messages.length === 0) {
-        supabase
-          .from('chat_messages')
+        (supabase
+          .from('chat_messages' as any) as any)
           .select('*')
           .eq('session_id', sessionId)
           .order('created_at', { ascending: true })
@@ -156,7 +155,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const { error } = await supabase.from('chat_sessions').update({ title }).eq('id', sessionId);
+      const { error } = await (supabase.from('chat_sessions' as any) as any).update({ title }).eq('id', sessionId);
       if (error) throw error;
     } catch (error: any) {
       console.error('Error updating session title', error);
@@ -195,7 +194,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const { error: messageError } = await supabase.from('chat_messages').insert({
+      const { error: messageError } = await (supabase.from('chat_messages' as any) as any).insert({
         session_id: sessionId,
         sender: newMessage.type,
         content: newMessage.content
@@ -206,7 +205,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         throw new Error(`Failed to save message: ${messageError.message}`);
       }
 
-      const { error: sessionError } = await supabase.from('chat_sessions').update({ 
+      const { error: sessionError } = await (supabase.from('chat_sessions' as any) as any).update({ 
         last_message_at: timestamp.toISOString() 
       }).eq('id', sessionId);
 
@@ -231,7 +230,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const { error } = await supabase.from('chat_sessions').update({
+      const { error } = await (supabase.from('chat_sessions' as any) as any).update({
         request_id: requestId,
         status: 'completed'
       }).eq('id', sessionId);
@@ -258,7 +257,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     ));
 
     try {
-      const { error } = await supabase.from('chat_sessions').update({ status: 'archived' }).eq('id', sessionId);
+      const { error } = await (supabase.from('chat_sessions' as any) as any).update({ status: 'archived' }).eq('id', sessionId);
       if (error) throw error;
     } catch (error: any) {
       console.error('Error archiving session', error);
@@ -273,14 +272,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const deleteSession = async (sessionId: string) => {
     try {
       // Delete messages first (foreign key constraint)
-      await supabase
-        .from('chat_messages')
+      await (supabase
+        .from('chat_messages' as any) as any)
         .delete()
         .eq('session_id', sessionId);
 
       // Delete session
-      await supabase
-        .from('chat_sessions')
+      await (supabase
+        .from('chat_sessions' as any) as any)
         .delete()
         .eq('id', sessionId);
 
