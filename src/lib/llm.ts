@@ -5,40 +5,60 @@ export type LLMMessage = {
 
 import { supabase } from '@/integrations/supabase/client';
 
-interface ChatResponse {
-  content: string;
-  usage?: {
-    prompt_tokens: number;
-    completion_tokens: number;
-    total_tokens: number;
-  };
+/**
+ * Retrieve the OpenAI API key stored as a Supabase secret.
+ */
+async function getOpenAIApiKey(): Promise<string> {
+  const { data, error } = await supabase.functions.invoke('get-secret', {
+    body: { name: 'OPENAI_API_KEY' }
+  });
+
+  if (error || !data?.value) {
+    console.error('getOpenAIApiKey: failed', error, data);
+    throw new Error('Failed to load OpenAI API key');
+  }
+
+  return data.value as string;
 }
 
 export async function sendChatMessage(messages: LLMMessage[]): Promise<string> {
   console.log('sendChatMessage: starting...');
-  
+
   try {
-    console.log('sendChatMessage: calling secure chat-openai function...');
-    
-    const { data, error } = await supabase.functions.invoke('chat-openai', {
-      body: { 
+    console.log('sendChatMessage: retrieving API key...');
+    const apiKey = await getOpenAIApiKey();
+
+    console.log('sendChatMessage: calling OpenAI...');
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
         messages,
-        maxTokens: 1000 
-      }
+        max_tokens: 1000,
+        temperature: 0.7,
+      }),
     });
 
-    if (error) {
-      console.error('sendChatMessage: edge function error', error);
-      throw new Error(`Chat service error: ${error.message}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('sendChatMessage: OpenAI error', response.status, errorText);
+      throw new Error('Failed to fetch response from OpenAI');
     }
 
-    if (!data?.content) {
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content?.trim();
+
+    if (!content) {
       console.error('sendChatMessage: no content in response', data);
       throw new Error('No response content received');
     }
 
     console.log('sendChatMessage: success');
-    return data.content;
+    return content;
   } catch (error) {
     console.error('sendChatMessage: exception', error);
     throw error;
