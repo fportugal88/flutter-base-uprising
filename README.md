@@ -82,6 +82,20 @@ No aplicativo, o identificador do assistente é recuperado dinamicamente atravé
 da function `get-assistant-discovery`, portanto nenhuma variável de ambiente é
 necessária para isso.
 
+## Segurança
+
+A function `chat-openai` agora limita o acesso CORS aos domínios definidos na
+variável de ambiente `ALLOWED_ORIGINS` (lista separada por vírgulas). Os logs da
+function são sanitizados para evitar o registro de dados sensíveis.
+
+```sh
+# Exemplo
+ALLOWED_ORIGINS=https://exemplo.com,https://app.exemplo.com
+```
+
+> **Nota:** avalie implementar mecanismos adicionais de rate limiting ou uma
+> autenticação mais estrita conforme necessário para o seu ambiente.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/ee506ff2-f35d-4130-9ddb-fd3727716c89) and click on Share -> Publish.
