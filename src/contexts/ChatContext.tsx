@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/hooks/use-toast';
 
 export interface Message {
   id: string;
@@ -27,13 +28,13 @@ export interface ChatSession {
 interface ChatContextType {
   sessions: ChatSession[];
   currentSession: ChatSession | null;
-  createNewSession: (title?: string) => string;
+  createNewSession: (title?: string) => Promise<string>;
   loadSession: (sessionId: string) => void;
-  updateSessionTitle: (sessionId: string, title: string) => void;
-  addMessageToSession: (sessionId: string, message: Omit<Message, 'id' | 'timestamp'>) => void;
-  linkSessionToRequest: (sessionId: string, requestId: string) => void;
+  updateSessionTitle: (sessionId: string, title: string) => Promise<void>;
+  addMessageToSession: (sessionId: string, message: Omit<Message, 'id' | 'timestamp'>) => Promise<void>;
+  linkSessionToRequest: (sessionId: string, requestId: string) => Promise<void>;
   getSessionByRequest: (requestId: string) => ChatSession | undefined;
-  archiveSession: (sessionId: string) => void;
+  archiveSession: (sessionId: string) => Promise<void>;
   deleteSession: (sessionId: string) => Promise<void>;
 }
 
@@ -77,7 +78,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     loadSessions();
   }, [user, session]);
 
-  const createNewSession = (title?: string): string => {
+  const createNewSession = async (title?: string): Promise<string> => {
     const id = crypto.randomUUID();
     const createdAt = new Date();
     const newSession: ChatSession = {
@@ -92,20 +93,24 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     setSessions(prev => [newSession, ...prev]);
     setCurrentSession(newSession);
 
-    // Salvar sessão no banco de dados
     if (user) {
-      supabase.from('chat_sessions').insert({
-        id,
-        user_id: user.id,
-        title: newSession.title,
-        status: 'active'
-      }).then(({ error }) => {
-        if (error) {
-          console.error('Error creating session', error);
-        } else {
-          console.log('Session created successfully:', id);
-        }
-      });
+      try {
+        const { error } = await supabase.from('chat_sessions').insert({
+          id,
+          user_id: user.id,
+          title: newSession.title,
+          status: 'active'
+        });
+        if (error) throw error;
+        console.log('Session created successfully:', id);
+      } catch (error: any) {
+        console.error('Error creating session', error);
+        toast({
+          title: 'Erro ao criar sessão',
+          description: error.message || 'Não foi possível criar a sessão.'
+        });
+        throw error;
+      }
     }
 
     return id;
@@ -139,7 +144,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const updateSessionTitle = (sessionId: string, title: string) => {
+  const updateSessionTitle = async (sessionId: string, title: string): Promise<void> => {
     setSessions(prev => prev.map(session =>
       session.id === sessionId
         ? { ...session, title }
@@ -150,7 +155,17 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       setCurrentSession(prev => prev ? { ...prev, title } : null);
     }
 
-    supabase.from('chat_sessions').update({ title }).eq('id', sessionId);
+    try {
+      const { error } = await supabase.from('chat_sessions').update({ title }).eq('id', sessionId);
+      if (error) throw error;
+    } catch (error: any) {
+      console.error('Error updating session title', error);
+      toast({
+        title: 'Erro ao atualizar título',
+        description: error.message || 'Não foi possível atualizar o título da sessão.'
+      });
+      throw error;
+    }
   };
 
   const addMessageToSession = async (sessionId: string, message: Omit<Message, 'id' | 'timestamp'>): Promise<void> => {
@@ -204,7 +219,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const linkSessionToRequest = (sessionId: string, requestId: string) => {
+  const linkSessionToRequest = async (sessionId: string, requestId: string): Promise<void> => {
     setSessions(prev => prev.map(session =>
       session.id === sessionId
         ? { ...session, requestId, status: 'completed' as const }
@@ -215,24 +230,44 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       setCurrentSession(prev => prev ? { ...prev, requestId, status: 'completed' } : null);
     }
 
-    supabase.from('chat_sessions').update({ 
-      request_id: requestId, 
-      status: 'completed' 
-    }).eq('id', sessionId);
+    try {
+      const { error } = await supabase.from('chat_sessions').update({
+        request_id: requestId,
+        status: 'completed'
+      }).eq('id', sessionId);
+      if (error) throw error;
+    } catch (error: any) {
+      console.error('Error linking session to request', error);
+      toast({
+        title: 'Erro ao vincular sessão',
+        description: error.message || 'Não foi possível vincular a sessão ao pedido.'
+      });
+      throw error;
+    }
   };
 
   const getSessionByRequest = (requestId: string): ChatSession | undefined => {
     return sessions.find(session => session.requestId === requestId);
   };
 
-  const archiveSession = (sessionId: string) => {
+  const archiveSession = async (sessionId: string): Promise<void> => {
     setSessions(prev => prev.map(session =>
       session.id === sessionId
         ? { ...session, status: 'archived' as const }
         : session
     ));
 
-    supabase.from('chat_sessions').update({ status: 'archived' }).eq('id', sessionId);
+    try {
+      const { error } = await supabase.from('chat_sessions').update({ status: 'archived' }).eq('id', sessionId);
+      if (error) throw error;
+    } catch (error: any) {
+      console.error('Error archiving session', error);
+      toast({
+        title: 'Erro ao arquivar sessão',
+        description: error.message || 'Não foi possível arquivar a sessão.'
+      });
+      throw error;
+    }
   };
 
   const deleteSession = async (sessionId: string) => {
