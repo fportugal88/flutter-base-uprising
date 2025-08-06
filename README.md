@@ -62,12 +62,22 @@ This project is built with:
 
 ## Assistant Configuration
 
-O comportamento do assistente agora é definido através de um Assistente criado
-no painel da OpenAI. Configure o seu assistente e informe o seu identificador
-nas variáveis de ambiente `VITE_ASSISTANT_ID` (aplicação web) e `ASSISTANT_ID`
-(função do Supabase). O arquivo
-[`public/assistant-instructions.md`](public/assistant-instructions.md) não é
-mais utilizado.
+O comportamento do assistente é definido através de um Assistente criado no
+painel da OpenAI. As instruções do Assistente ficam versionadas em
+[`public/assistant-instructions.md`](public/assistant-instructions.md).
+
+Use o script abaixo para sincronizar essas instruções com a OpenAI e salvar o
+identificador do assistente nas variáveis de ambiente `VITE_ASSISTANT_ID` e
+`ASSISTANT_ID`:
+
+```sh
+npm run sync-assistant
+```
+
+Certifique-se de definir a variável `OPENAI_API_KEY` e, opcionalmente,
+`OPENAI_ASSISTANT_MODEL` antes de executar o script. Caso não exista um
+assistente ainda, um novo será criado usando o modelo informado (padrão
+`gpt-4o-mini`).
 
 ## How can I deploy this project?
 

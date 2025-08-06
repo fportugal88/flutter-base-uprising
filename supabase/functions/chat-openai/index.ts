@@ -134,17 +134,28 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const content = data.output_text?.trim() || '';
-    
+    const content = data?.output?.[0]?.content?.[0]?.text?.value?.trim();
+
+    if (!content) {
+      console.error('OpenAI response missing text content', data);
+      return new Response(
+        JSON.stringify({ error: 'No text content in OpenAI response' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     console.log('OpenAI response received successfully');
-    
+
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         content,
-        usage: data.usage 
+        usage: data.usage
       }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
   } catch (error) {
