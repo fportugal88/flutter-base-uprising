@@ -139,18 +139,19 @@ serve(async (req) => {
     let assistantId: string;
     try {
       console.log('Fetching assistant ID from discovery function...');
+      const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
       const discoveryResponse = await fetch(`${supabaseUrl}/functions/v1/get-assistant-discovery`, {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Authorization': authHeader,
-          'apikey': supabaseServiceKey,
+          'apikey': supabaseAnonKey,
           'Content-Type': 'application/json'
         }
       });
 
       if (discoveryResponse.ok) {
         const discoveryData = await discoveryResponse.json();
-        assistantId = discoveryData.assistant_id;
+        assistantId = discoveryData.assistant_id || discoveryData;
         console.log('Assistant ID retrieved from discovery function:', assistantId);
       } else {
         const errorText = await discoveryResponse.text();
