@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import { toast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -26,6 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const cleanupAuthState = () => {
     // Remove all Supabase auth keys from localStorage
@@ -66,7 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       const redirectUrl = `${window.location.origin}/`;
-      
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -79,17 +82,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        console.error('Signup error:', error.message);
-        throw new Error(`Registration failed: ${error.message}`);
+        toast({
+          title: 'Erro',
+          description: error.message,
+          variant: 'destructive',
+        });
+        return { error };
       }
 
       if (data.user && !data.session) {
-        console.log('Please check your email to confirm your account');
+        toast({
+          title: 'Cadastro realizado',
+          description: 'Verifique seu e-mail para confirmar sua conta',
+        });
       }
 
       return { error: null };
     } catch (error: any) {
-      console.error('Signup error:', error.message);
+      toast({
+        title: 'Erro',
+        description: error.message,
+        variant: 'destructive',
+      });
       return { error };
     } finally {
       setLoading(false);
@@ -105,18 +119,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        console.error('Login error:', error.message);
-        throw new Error(`Login failed: ${error.message}`);
+        toast({
+          title: 'Erro',
+          description: error.message,
+          variant: 'destructive',
+        });
+        return { error };
       }
 
       if (data.user) {
-        console.log('Login successful');
-        window.location.href = '/';
+        navigate('/');
       }
 
       return { error: null };
     } catch (error: any) {
-      console.error('Login error:', error.message);
+      toast({
+        title: 'Erro',
+        description: error.message,
+        variant: 'destructive',
+      });
       return { error };
     } finally {
       setLoading(false);
@@ -127,7 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     try {
       const redirectUrl = `${window.location.origin}/`;
-      
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
@@ -136,13 +157,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        console.error('Provider login error:', error.message);
-        throw new Error(`${provider} login failed: ${error.message}`);
+        toast({
+          title: 'Erro',
+          description: error.message,
+          variant: 'destructive',
+        });
+        return { error };
       }
 
       return { error: null };
     } catch (error: any) {
-      console.error('Provider login error:', error.message);
+      toast({
+        title: 'Erro',
+        description: error.message,
+        variant: 'destructive',
+      });
       return { error };
     } finally {
       setLoading(false);
@@ -153,15 +182,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { error } = await supabase.auth.signOut();
       if (error && error.message !== 'Invalid session') {
-        console.error('Sign out error:', error);
+        toast({
+          title: 'Erro',
+          description: error.message,
+          variant: 'destructive',
+        });
       }
-      
+
       cleanupAuthState();
-      window.location.href = '/auth';
+      navigate('/auth');
     } catch (error: any) {
-      console.error('Sign out error:', error.message);
       cleanupAuthState();
-      window.location.href = '/auth';
+      navigate('/auth');
     }
   };
 
