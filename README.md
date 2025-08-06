@@ -60,6 +60,17 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto com as variáveis abaixo:
+
+```sh
+VITE_SUPABASE_URL=<url-do-seu-projeto-supabase>
+VITE_SUPABASE_ANON_KEY=<chave-anon-publica>
+```
+
+O arquivo `.env` já está listado no `.gitignore`, garantindo que essas chaves não sejam commitadas.
+
 ## Assistant Configuration
 
 O comportamento do assistente é definido através de um Assistente criado no
