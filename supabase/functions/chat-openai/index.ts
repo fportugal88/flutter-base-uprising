@@ -135,7 +135,11 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const content = data?.output?.[0]?.content?.[0]?.text?.value?.trim();
+    // Try multiple shapes for the response content to avoid runtime errors
+    const content =
+      data?.output_text?.trim() ??
+      data?.output?.[0]?.content?.[0]?.text?.value?.trim() ??
+      data?.output?.[0]?.content?.[0]?.text?.trim();
 
     if (!content) {
       console.error('OpenAI response missing text content', data);
