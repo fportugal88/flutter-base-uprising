@@ -3,14 +3,41 @@ export type LLMMessage = {
   content: string;
 };
 
-// Usar a chave do Supabase secrets diretamente
-const OPENAI_API_KEY = 'sk-proj-dKAR6mWLtVfhEI1Qr5OuRMRRWFfM3uQm7QZjEk3sQTfn7_L8OP0Y3kA8Qk5pN2T3BlbkFJrHk9QnMjGhR8EwK4zL1bY_Xv2VfLnK7qCdSgA6FcJdNmPqZ1';
+import { supabase } from '@/integrations/supabase/client';
+
+async function getApiKey(): Promise<string | null> {
+  try {
+    console.log('llm.getApiKey: starting...');
+    
+    console.log('llm.getApiKey: fetching OPENAI_API_KEY from Supabase secrets...');
+    const { data, error } = await supabase.functions.invoke('get-secret', {
+      body: { name: 'OPENAI_API_KEY' }
+    });
+
+    if (error) {
+      console.error('llm.getApiKey: error getting secret', error);
+      return null;
+    }
+
+    if (!data?.value) {
+      console.error('llm.getApiKey: no API key found in secrets');
+      return null;
+    }
+
+    console.log('llm.getApiKey: API key retrieved successfully');
+    return data.value;
+  } catch (error) {
+    console.error('llm.getApiKey: exception', error);
+    return null;
+  }
+}
 
 export async function sendChatMessage(messages: LLMMessage[]): Promise<string> {
   console.log('sendChatMessage: starting...');
   
-  if (!OPENAI_API_KEY) {
-    console.error('sendChatMessage: no API key configured');
+  const apiKey = await getApiKey();
+  if (!apiKey) {
+    console.error('sendChatMessage: no API key available');
     throw new Error('API key not configured');
   }
   
@@ -19,7 +46,7 @@ export async function sendChatMessage(messages: LLMMessage[]): Promise<string> {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       model: 'gpt-4.1-2025-04-14',
