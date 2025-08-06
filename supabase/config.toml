@@ -2,3 +2,6 @@ project_id = "bqkmmyjqcazjldicxddn"
 
 [functions.get-secret]
 verify_jwt = false
+
+[functions.chat-openai]
+verify_jwt = true

@@ -153,7 +153,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     supabase.from('chat_sessions').update({ title }).eq('id', sessionId);
   };
 
-  const addMessageToSession = (sessionId: string, message: Omit<Message, 'id' | 'timestamp'>) => {
+  const addMessageToSession = async (sessionId: string, message: Omit<Message, 'id' | 'timestamp'>): Promise<void> => {
     const timestamp = new Date();
     const newMessage: Message = {
       ...message,
@@ -179,17 +179,29 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       } : null);
     }
 
-    supabase.from('chat_messages').insert({
-      session_id: sessionId,
-      sender: newMessage.type,
-      content: newMessage.content
-    }).then(({ error }) => {
-      if (error) console.error('Error saving message', error);
-    });
+    try {
+      const { error: messageError } = await supabase.from('chat_messages').insert({
+        session_id: sessionId,
+        sender: newMessage.type,
+        content: newMessage.content
+      });
 
-    supabase.from('chat_sessions').update({ 
-      last_message_at: timestamp.toISOString() 
-    }).eq('id', sessionId);
+      if (messageError) {
+        console.error('Error saving message:', messageError);
+        throw new Error(`Failed to save message: ${messageError.message}`);
+      }
+
+      const { error: sessionError } = await supabase.from('chat_sessions').update({ 
+        last_message_at: timestamp.toISOString() 
+      }).eq('id', sessionId);
+
+      if (sessionError) {
+        console.error('Error updating session:', sessionError);
+      }
+    } catch (error) {
+      console.error('Error in addMessageToSession:', error);
+      throw error;
+    }
   };
 
   const linkSessionToRequest = (sessionId: string, requestId: string) => {

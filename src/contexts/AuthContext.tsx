@@ -65,13 +65,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string, displayName?: string) => {
     setLoading(true);
     try {
-      cleanupAuthState();
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-      }
-
       const redirectUrl = `${window.location.origin}/`;
       
       const { data, error } = await supabase.auth.signUp({
@@ -87,7 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Signup error:', error.message);
-        return { error };
+        throw new Error(`Registration failed: ${error.message}`);
       }
 
       if (data.user && !data.session) {
@@ -106,13 +99,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     try {
-      cleanupAuthState();
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-      }
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -120,12 +106,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Login error:', error.message);
-        return { error };
+        throw new Error(`Login failed: ${error.message}`);
       }
 
       if (data.user) {
         console.log('Login successful');
-        // Force page reload for clean state
         window.location.href = '/';
       }
 
@@ -141,13 +126,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithProvider = async (provider: 'google' | 'apple') => {
     setLoading(true);
     try {
-      cleanupAuthState();
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Continue even if this fails
-      }
-
       const redirectUrl = `${window.location.origin}/`;
       
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -159,7 +137,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Provider login error:', error.message);
-        return { error };
+        throw new Error(`${provider} login failed: ${error.message}`);
       }
 
       return { error: null };
@@ -171,19 +149,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signOut = async () => {
+  const signOut = async (): Promise<void> => {
     try {
-      cleanupAuthState();
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        // Ignore errors
+      const { error } = await supabase.auth.signOut();
+      if (error && error.message !== 'Invalid session') {
+        console.error('Sign out error:', error);
       }
-      console.log('Logout successful');
-      // Force page reload for clean state
+      
+      cleanupAuthState();
       window.location.href = '/auth';
     } catch (error: any) {
-      console.error('Logout error:', error.message);
+      console.error('Sign out error:', error.message);
+      cleanupAuthState();
+      window.location.href = '/auth';
     }
   };
 

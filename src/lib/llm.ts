@@ -5,63 +5,42 @@ export type LLMMessage = {
 
 import { supabase } from '@/integrations/supabase/client';
 
-async function getApiKey(): Promise<string | null> {
-  try {
-    console.log('llm.getApiKey: starting...');
-    
-    console.log('llm.getApiKey: fetching OPENAI_API_KEY from Supabase secrets...');
-    const { data, error } = await supabase.functions.invoke('get-secret', {
-      body: { name: 'OPENAI_API_KEY' }
-    });
-
-    if (error) {
-      console.error('llm.getApiKey: error getting secret', error);
-      return null;
-    }
-
-    if (!data?.value) {
-      console.error('llm.getApiKey: no API key found in secrets');
-      return null;
-    }
-
-    console.log('llm.getApiKey: API key retrieved successfully');
-    return data.value;
-  } catch (error) {
-    console.error('llm.getApiKey: exception', error);
-    return null;
-  }
+interface ChatResponse {
+  content: string;
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
 }
 
 export async function sendChatMessage(messages: LLMMessage[]): Promise<string> {
   console.log('sendChatMessage: starting...');
   
-  const apiKey = await getApiKey();
-  if (!apiKey) {
-    console.error('sendChatMessage: no API key available');
-    throw new Error('API key not configured');
-  }
-  
-  console.log('sendChatMessage: API key found, making OpenAI call...');
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini', // Usando modelo mais estável
-      messages,
-      max_tokens: 1000,
-    }),
-  });
+  try {
+    console.log('sendChatMessage: calling secure chat-openai function...');
+    
+    const { data, error } = await supabase.functions.invoke('chat-openai', {
+      body: { 
+        messages,
+        maxTokens: 1000 
+      }
+    });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('sendChatMessage: OpenAI error', errorText);
-    throw new Error(errorText);
-  }
+    if (error) {
+      console.error('sendChatMessage: edge function error', error);
+      throw new Error(`Chat service error: ${error.message}`);
+    }
 
-  const data = await response.json();
-  console.log('sendChatMessage: success');
-  return data.choices?.[0]?.message?.content?.trim() || '';
+    if (!data?.content) {
+      console.error('sendChatMessage: no content in response', data);
+      throw new Error('No response content received');
+    }
+
+    console.log('sendChatMessage: success');
+    return data.content;
+  } catch (error) {
+    console.error('sendChatMessage: exception', error);
+    throw error;
+  }
 }
