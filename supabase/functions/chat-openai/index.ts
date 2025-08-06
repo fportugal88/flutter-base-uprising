@@ -122,38 +122,54 @@ serve(async (req) => {
       );
     }
 
-    // Obter chave e ID do assistente
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openaiApiKey) {
-      console.error('OpenAI API key not configured');
-      return new Response(
-        JSON.stringify({ error: 'OpenAI API key not configured' }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    // Obter Assistant ID da função de descoberta
+    // Obter chave OpenAI e ID do assistente da função de descoberta
+    let openaiApiKey: string;
     let assistantId: string;
+    
     try {
-      console.log('Fetching assistant ID from discovery function...');
+      console.log('Fetching OpenAI API key from discovery function...');
       const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-      const discoveryResponse = await fetch(`${supabaseUrl}/functions/v1/get-assistant-discovery`, {
-        method: 'GET',
+      
+      // Buscar a chave da API OpenAI
+      const apiKeyResponse = await fetch(`${supabaseUrl}/functions/v1/get-assistant-discovery`, {
+        method: 'POST',
         headers: {
           'Authorization': authHeader,
           'apikey': supabaseAnonKey,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({ name: 'OPENAI_API_KEY' })
       });
 
-      if (discoveryResponse.ok) {
-        const discoveryData = await discoveryResponse.json();
-        assistantId = discoveryData.assistant_id || discoveryData;
-        console.log('Assistant ID retrieved from discovery function:', assistantId);
-      } else {
+      if (!apiKeyResponse.ok) {
+        const errorText = await apiKeyResponse.text();
+        console.error('Failed to get OpenAI API key from discovery function:', errorText);
+        return new Response(
+          JSON.stringify({ error: 'Failed to get OpenAI API key' }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      const apiKeyData = await apiKeyResponse.json();
+      openaiApiKey = apiKeyData.api_key;
+      console.log('OpenAI API key retrieved successfully');
+
+      // Buscar o ID do assistente
+      console.log('Fetching assistant ID from discovery function...');
+      const discoveryResponse = await fetch(`${supabaseUrl}/functions/v1/get-assistant-discovery`, {
+        method: 'POST',
+        headers: {
+          'Authorization': authHeader,
+          'apikey': supabaseAnonKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: 'ASSISTENT_DISCOVERY' })
+      });
+
+      if (!discoveryResponse.ok) {
         const errorText = await discoveryResponse.text();
         console.error('Failed to get assistant ID from discovery function:', errorText);
         return new Response(
@@ -164,10 +180,26 @@ serve(async (req) => {
           }
         );
       }
+
+      const discoveryData = await discoveryResponse.json();
+      assistantId = discoveryData.assistant_id;
+      console.log('Assistant ID retrieved successfully:', assistantId);
+
     } catch (error) {
       console.error('Error calling discovery function:', sanitizeLog(error));
       return new Response(
-        JSON.stringify({ error: 'Failed to get assistant ID' }),
+        JSON.stringify({ error: 'Failed to get secrets from discovery function' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    if (!openaiApiKey) {
+      console.error('OpenAI API key not available');
+      return new Response(
+        JSON.stringify({ error: 'OpenAI API key not configured' }),
         {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
