@@ -136,9 +136,35 @@ serve(async (req) => {
       );
     }
 
-    const assistantId = bodyAssistantId || Deno.env.get('ASSISTENT_DISCOVERY');
+    // Obter Assistant ID da função de descoberta
+    let assistantId = bodyAssistantId;
     if (!assistantId) {
-      console.error('Assistant ID not configured');
+      try {
+        console.log('Fetching assistant ID from discovery function...');
+        const discoveryResponse = await fetch(`${supabaseUrl}/functions/v1/get-assistant-discovery`, {
+          method: 'POST',
+          headers: {
+            'Authorization': authHeader,
+            'apikey': supabaseServiceKey,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (discoveryResponse.ok) {
+          const discoveryData = await discoveryResponse.json();
+          assistantId = discoveryData.assistant_id;
+          console.log('Assistant ID retrieved from discovery function');
+        } else {
+          const errorText = await discoveryResponse.text();
+          console.error('Failed to get assistant ID from discovery function:', errorText);
+        }
+      } catch (error) {
+        console.error('Error calling discovery function:', sanitizeLog(error));
+      }
+    }
+
+    if (!assistantId) {
+      console.error('Assistant ID not available');
       return new Response(
         JSON.stringify({ error: 'Assistant ID not configured' }),
         {
