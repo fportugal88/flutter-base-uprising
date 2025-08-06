@@ -15,6 +15,7 @@ interface ChatMessage {
 
 interface ChatRequest {
   messages: ChatMessage[];
+  assistantId?: string;
   maxTokens?: number;
 }
 
@@ -64,7 +65,7 @@ serve(async (req) => {
     console.log('Authenticated user:', user.id);
 
     // Obter dados da requisição
-    const { messages, maxTokens = 1000 }: ChatRequest = await req.json();
+    const { messages, assistantId: bodyAssistantId, maxTokens = 1000 }: ChatRequest = await req.json();
     
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response(
@@ -76,20 +77,20 @@ serve(async (req) => {
       );
     }
 
-    // Obter chave da OpenAI do ambiente
+    // Obter chave e ID do assistente
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openaiApiKey) {
       console.error('OpenAI API key not configured');
       return new Response(
         JSON.stringify({ error: 'OpenAI API key not configured' }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
 
-    const assistantId = Deno.env.get('ASSISTANT_ID');
+    const assistantId = bodyAssistantId || Deno.env.get('ASSISTANT_ID');
     if (!assistantId) {
       console.error('Assistant ID not configured');
       return new Response(

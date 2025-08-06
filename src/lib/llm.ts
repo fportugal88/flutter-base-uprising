@@ -10,8 +10,14 @@ export async function sendChatMessage(messages: LLMMessage[]): Promise<string> {
 
   try {
     console.log('sendChatMessage: invoking chat-openai function...');
+
+    const assistantId = import.meta.env.VITE_ASSISTANT_ID;
+    if (!assistantId) {
+      throw new Error('Assistant ID not configured');
+    }
+
     const { data, error } = await supabase.functions.invoke('chat-openai', {
-      body: { messages }
+      body: { messages, assistantId }
     });
 
     if (error) {
