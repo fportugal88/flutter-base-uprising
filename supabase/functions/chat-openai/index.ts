@@ -89,18 +89,16 @@ serve(async (req) => {
       );
     }
 
-    console.log('Loading assistant instructions...');
-    const instructionsUrl =
-      Deno.env.get('ASSISTANT_INSTRUCTIONS_URL') ||
-      'https://raw.githubusercontent.com/OWNER/REPO/main/public/assistant-instructions.md';
-    let instructions = '';
-    try {
-      const instructionsRes = await fetch(instructionsUrl);
-      if (instructionsRes.ok) {
-        instructions = await instructionsRes.text();
-      }
-    } catch (e) {
-      console.error('Failed to load instructions:', e);
+    const assistantId = Deno.env.get('ASSISTANT_ID');
+    if (!assistantId) {
+      console.error('Assistant ID not configured');
+      return new Response(
+        JSON.stringify({ error: 'Assistant ID not configured' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     console.log('Making OpenAI responses API call...');
@@ -113,9 +111,8 @@ serve(async (req) => {
         'Authorization': `Bearer ${openaiApiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-mini',
+        assistant_id: assistantId,
         input: messages,
-        instructions,
         max_output_tokens: maxTokens,
         temperature: 0.7,
       }),
