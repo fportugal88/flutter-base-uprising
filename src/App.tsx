@@ -9,7 +9,6 @@ import DataAssistantWithSidebar from "./pages/DataAssistantWithSidebar";
 import MyRequests from "./pages/MyRequests";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
-import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -17,11 +16,10 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
             <Route 
               path="/" 
               element={
@@ -59,7 +57,6 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
-      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
