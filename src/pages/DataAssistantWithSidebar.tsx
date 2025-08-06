@@ -9,6 +9,7 @@ import { MessageCircle, Send, ArrowLeft } from "lucide-react";
 import { ChatSidebar } from "@/components/layout/ChatSidebar";
 import { useChat } from "@/contexts/ChatContext";
 import { sendChatMessage } from "@/lib/llm";
+import { logError } from "@/lib/logger";
 import type { Message as ChatMessage } from "@/contexts/ChatContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 
@@ -75,7 +76,7 @@ const DataAssistantWithSidebar = () => {
         });
       });
     } catch (e) {
-      console.error('Erro ao chamar OpenAI:', e);
+      logError('Erro ao chamar OpenAI:', e);
       simulateTyping(() => {
         addMessage({
           type: 'assistant',
@@ -124,7 +125,7 @@ const DataAssistantWithSidebar = () => {
         content: aiResponse
       });
     } catch (e) {
-      console.error('Erro ao chamar OpenAI:', e);
+      logError('Erro ao chamar OpenAI:', e);
       setIsTyping(false);
       addMessage({
         type: 'assistant',

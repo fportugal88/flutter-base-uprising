@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Send, ArrowLeft, Check, Database, Clock, Tag, ExternalLink, AlertCircle, FileText, Eye, Edit3, X } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { log } from "@/lib/logger";
 
 interface Message {
   id: string;
@@ -123,7 +124,7 @@ const DataAssistant = () => {
   const callAIFunction = async (message: string, context: any) => {
     // TODO: Integrar com serviço de IA
     // Esta função será substituída pela integração real com IA Generativa
-    console.log('AI Input:', { message, context, currentStep });
+    log('AI Input:', { message, context, currentStep });
     
     // Mock response baseado no contexto
     if (currentStep === 'intention_detection') {
