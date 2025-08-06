@@ -2,75 +2,19 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
-export interface Request {
-  id: string;
-  codigo_solicitacao: string;
-  titulo: string;
-  descricao: string;
-  status: 'pendente' | 'em_curadoria' | 'em_desenvolvimento' | 'concluida' | 'cancelada' | 'duplicada';
-  prioridade: 'baixa' | 'normal' | 'alta' | 'urgente';
-  categoria: string[];
-  origem_canal: string;
-  criado_em: string;
-  estimativa_entrega?: string;
-  entregue_em?: string;
-  cancelado_em?: string;
-  solicitante_id: string;
-  equipe_solicitante?: string;
-  justificativa_negocio?: string;
-  objetivo_estrategico?: 'aumento_de_conversao' | 'reduzir_churn' | 'automatizacao' | 'eficiencia_operacional' | 'novo_produto';
-  relevancia_financeira?: string;
-  impacto_estimado?: 'baixo' | 'medio' | 'alto' | 'estrategico';
-  responsavel_tecnico_id?: string;
-  curador_id?: string;
-  status_curadoria: 'aguardando' | 'em_curadoria' | 'validado' | 'reprovado' | 'reencaminhado';
-  votos_endosso: number;
-  usuarios_endosso: string[];
-  pipeline_reutilizado?: string;
-  nova_tabela_gerada?: string;
-  dashboards_relacionados: string[];
-  documentacao_gerada?: string;
-  feedback_efetividade?: 'excelente' | 'bom' | 'mediano' | 'incompleto';
-  proximo_passo_sugerido?: string;
-  classificacao_dado: 'nao_sensivel' | 'PII' | 'financeiro' | 'confidencial';
-  revisado_por_compliance: boolean;
-  proposito_de_uso?: string;
-  validade_uso?: string;
-  updated_at: string;
-  // Fields from the profiles table. These are populated only when the query joins the profiles table explicitly.
+export type Request = Tables<'requests'> & {
   solicitante_name?: string;
   responsavel_name?: string;
   curador_name?: string;
-}
-
-type CreateRequestInput = {
-  titulo: string;
-  descricao: string;
-  categoria?: string[];
-  status?: 'pendente' | 'em_curadoria' | 'em_desenvolvimento' | 'concluida' | 'cancelada' | 'duplicada';
-  prioridade?: 'baixa' | 'normal' | 'alta' | 'urgente';
-  origem_canal?: string;
-  equipe_solicitante?: string;
-  justificativa_negocio?: string;
-  objetivo_estrategico?: 'aumento_de_conversao' | 'reduzir_churn' | 'automatizacao' | 'eficiencia_operacional' | 'novo_produto';
-  relevancia_financeira?: string;
-  impacto_estimado?: 'baixo' | 'medio' | 'alto' | 'estrategico';
-  status_curadoria?: 'aguardando' | 'em_curadoria' | 'validado' | 'reprovado' | 'reencaminhado';
-  classificacao_dado?: 'nao_sensivel' | 'PII' | 'financeiro' | 'confidencial';
-  estimativa_entrega?: string;
-  proposito_de_uso?: string;
 };
 
-export interface RequestComment {
-  id: string;
-  request_id: string;
-  user_id: string;
-  comentario: string;
-  criado_em: string;
-  updated_at: string;
+type CreateRequestInput = Omit<TablesInsert<'requests'>, 'solicitante_id'>;
+
+export type RequestComment = Tables<'request_comments'> & {
   user_name?: string;
-}
+};
 
 interface UseRequestsOptions {
   autoFetch?: boolean;
@@ -95,7 +39,11 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
 
       if (error) throw error;
 
-      setRequests((data || []) as unknown as Request[]);
+      if (Array.isArray(data)) {
+        setRequests(data);
+      } else {
+        setRequests([]);
+      }
     } catch (err) {
       console.error('Error fetching requests:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar solicitações');
@@ -122,12 +70,16 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
       const { data, error } = await supabase
         .from('requests')
         .select('*')
-        .eq('solicitante_id', currentUser.id as any)
+        .eq('solicitante_id', currentUser.id)
         .order('criado_em', { ascending: false });
 
       if (error) throw error;
 
-      setRequests((data || []) as unknown as Request[]);
+      if (Array.isArray(data)) {
+        setRequests(data);
+      } else {
+        setRequests([]);
+      }
     } catch (err) {
       console.error('Error fetching user requests:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar suas solicitações');
@@ -152,37 +104,40 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
     }
 
     try {
+      const newRequest: TablesInsert<'requests'> = {
+        titulo: requestData.titulo,
+        descricao: requestData.descricao,
+        categoria: requestData.categoria || [],
+        status: requestData.status || 'pendente',
+        prioridade: requestData.prioridade || 'normal',
+        origem_canal: requestData.origem_canal || 'chat',
+        solicitante_id: user.id,
+        equipe_solicitante: requestData.equipe_solicitante,
+        justificativa_negocio: requestData.justificativa_negocio,
+        objetivo_estrategico: requestData.objetivo_estrategico,
+        relevancia_financeira: requestData.relevancia_financeira,
+        impacto_estimado: requestData.impacto_estimado || 'medio',
+        status_curadoria: requestData.status_curadoria || 'aguardando',
+        classificacao_dado: requestData.classificacao_dado || 'nao_sensivel',
+        estimativa_entrega: requestData.estimativa_entrega,
+        proposito_de_uso: requestData.proposito_de_uso
+      };
+
       const { data, error } = await supabase
         .from('requests')
-        .insert({
-          titulo: requestData.titulo,
-          descricao: requestData.descricao,
-          categoria: requestData.categoria || [],
-          status: requestData.status || 'pendente',
-          prioridade: requestData.prioridade || 'normal',
-          origem_canal: requestData.origem_canal || 'chat',
-          solicitante_id: user.id,
-          equipe_solicitante: requestData.equipe_solicitante,
-          justificativa_negocio: requestData.justificativa_negocio,
-          objetivo_estrategico: requestData.objetivo_estrategico,
-          relevancia_financeira: requestData.relevancia_financeira,
-          impacto_estimado: requestData.impacto_estimado || 'medio',
-          status_curadoria: requestData.status_curadoria || 'aguardando',
-          classificacao_dado: requestData.classificacao_dado || 'nao_sensivel',
-          estimativa_entrega: requestData.estimativa_entrega,
-          proposito_de_uso: requestData.proposito_de_uso
-        } as any)
+        .insert(newRequest)
         .select('*')
         .single();
 
       if (error) throw error;
 
-      setRequests(prev => [data as unknown as Request, ...prev]);
-      
-      toast({
-        title: "Sucesso",
-        description: `Solicitação ${(data as any).codigo_solicitacao} criada com sucesso!`,
-      });
+      if (data) {
+        setRequests(prev => [data, ...prev]);
+        toast({
+          title: "Sucesso",
+          description: `Solicitação ${data.codigo_solicitacao} criada com sucesso!`,
+        });
+      }
 
       return data;
     } catch (err) {
@@ -196,23 +151,24 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
     }
   };
 
-  const updateRequest = async (id: string, updates: Partial<CreateRequestInput & { status: Request['status'] }>) => {
+  const updateRequest = async (id: string, updates: TablesUpdate<'requests'>) => {
     try {
       const { data, error } = await supabase
         .from('requests')
-        .update(updates as any)
-        .eq('id', id as any)
+        .update(updates)
+        .eq('id', id)
         .select('*')
         .single();
 
       if (error) throw error;
 
-      setRequests(prev => prev.map(req => req.id === id ? data as unknown as Request : req));
-      
-      toast({
-        title: "Sucesso",
-        description: "Solicitação atualizada com sucesso!",
-      });
+      if (data) {
+        setRequests(prev => prev.map(req => (req.id === id ? data : req)));
+        toast({
+          title: "Sucesso",
+          description: "Solicitação atualizada com sucesso!",
+        });
+      }
 
       return data;
     } catch (err) {
@@ -228,21 +184,25 @@ export const useRequests = (options: UseRequestsOptions = {}) => {
 
   const cancelRequest = async (id: string) => {
     try {
+      const updates: TablesUpdate<'requests'> = {
+        status: 'cancelada',
+        cancelado_em: new Date().toISOString(),
+      };
+
       const { error } = await supabase
         .from('requests')
-        .update({ 
-          status: 'cancelada',
-          cancelado_em: new Date().toISOString()
-        } as any)
-        .eq('id', id as any);
+        .update(updates)
+        .eq('id', id);
 
       if (error) throw error;
 
-      setRequests(prev => prev.map(req => 
-        req.id === id 
-          ? { ...req, status: 'cancelada' as const, cancelado_em: new Date().toISOString() }
-          : req
-      ));
+      setRequests(prev =>
+        prev.map(req =>
+          req.id === id
+            ? { ...req, status: 'cancelada', cancelado_em: updates.cancelado_em }
+            : req
+        )
+      );
       
       toast({
         title: "Sucesso",
@@ -292,12 +252,16 @@ export const useRequestComments = (requestId: string) => {
       const { data, error } = await supabase
         .from('request_comments')
         .select('*')
-        .eq('request_id', requestId as any)
+        .eq('request_id', requestId)
         .order('criado_em', { ascending: true });
 
       if (error) throw error;
 
-      setComments((data || []) as unknown as RequestComment[]);
+      if (Array.isArray(data)) {
+        setComments(data);
+      } else {
+        setComments([]);
+      }
     } catch (err) {
       console.error('Error fetching comments:', err);
     } finally {
@@ -309,19 +273,23 @@ export const useRequestComments = (requestId: string) => {
     if (!user) return null;
 
     try {
+      const newComment: TablesInsert<'request_comments'> = {
+        request_id: requestId,
+        user_id: user.id,
+        comentario,
+      };
+
       const { data, error } = await supabase
         .from('request_comments')
-        .insert([{
-          request_id: requestId,
-          user_id: user.id,
-          comentario
-        }] as any)
+        .insert([newComment])
         .select('*')
         .single();
 
       if (error) throw error;
 
-      setComments(prev => [...prev, data as unknown as RequestComment]);
+      if (data) {
+        setComments(prev => [...prev, data]);
+      }
       return data;
     } catch (err) {
       console.error('Error adding comment:', err);

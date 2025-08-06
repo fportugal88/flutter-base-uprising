@@ -12,9 +12,224 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
-  public: {
+  api: {
     Tables: {
-      [_ in never]: never
+      requests: {
+        Row: {
+          id: string
+          codigo_solicitacao: string
+          titulo: string
+          descricao: string
+          status:
+            | "pendente"
+            | "em_curadoria"
+            | "em_desenvolvimento"
+            | "concluida"
+            | "cancelada"
+            | "duplicada"
+          prioridade: "baixa" | "normal" | "alta" | "urgente"
+          categoria: string[]
+          origem_canal: string
+          criado_em: string
+          estimativa_entrega: string | null
+          entregue_em: string | null
+          cancelado_em: string | null
+          solicitante_id: string
+          equipe_solicitante: string | null
+          justificativa_negocio: string | null
+          objetivo_estrategico:
+            | "aumento_de_conversao"
+            | "reduzir_churn"
+            | "automatizacao"
+            | "eficiencia_operacional"
+            | "novo_produto"
+            | null
+          relevancia_financeira: string | null
+          impacto_estimado: "baixo" | "medio" | "alto" | "estrategico" | null
+          responsavel_tecnico_id: string | null
+          curador_id: string | null
+          status_curadoria:
+            | "aguardando"
+            | "em_curadoria"
+            | "validado"
+            | "reprovado"
+            | "reencaminhado"
+          votos_endosso: number
+          usuarios_endosso: string[]
+          pipeline_reutilizado: string | null
+          nova_tabela_gerada: string | null
+          dashboards_relacionados: string[]
+          documentacao_gerada: string | null
+          feedback_efetividade:
+            | "excelente"
+            | "bom"
+            | "mediano"
+            | "incompleto"
+            | null
+          proximo_passo_sugerido: string | null
+          classificacao_dado:
+            | "nao_sensivel"
+            | "PII"
+            | "financeiro"
+            | "confidencial"
+          revisado_por_compliance: boolean
+          proposito_de_uso: string | null
+          validade_uso: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          codigo_solicitacao?: string
+          titulo: string
+          descricao: string
+          status?:
+            | "pendente"
+            | "em_curadoria"
+            | "em_desenvolvimento"
+            | "concluida"
+            | "cancelada"
+            | "duplicada"
+          prioridade?: "baixa" | "normal" | "alta" | "urgente"
+          categoria?: string[]
+          origem_canal?: string
+          criado_em?: string
+          estimativa_entrega?: string | null
+          entregue_em?: string | null
+          cancelado_em?: string | null
+          solicitante_id: string
+          equipe_solicitante?: string | null
+          justificativa_negocio?: string | null
+          objetivo_estrategico?:
+            | "aumento_de_conversao"
+            | "reduzir_churn"
+            | "automatizacao"
+            | "eficiencia_operacional"
+            | "novo_produto"
+            | null
+          relevancia_financeira?: string | null
+          impacto_estimado?: "baixo" | "medio" | "alto" | "estrategico" | null
+          responsavel_tecnico_id?: string | null
+          curador_id?: string | null
+          status_curadoria?:
+            | "aguardando"
+            | "em_curadoria"
+            | "validado"
+            | "reprovado"
+            | "reencaminhado"
+          votos_endosso?: number
+          usuarios_endosso?: string[]
+          pipeline_reutilizado?: string | null
+          nova_tabela_gerada?: string | null
+          dashboards_relacionados?: string[]
+          documentacao_gerada?: string | null
+          feedback_efetividade?:
+            | "excelente"
+            | "bom"
+            | "mediano"
+            | "incompleto"
+            | null
+          proximo_passo_sugerido?: string | null
+          classificacao_dado?:
+            | "nao_sensivel"
+            | "PII"
+            | "financeiro"
+            | "confidencial"
+          revisado_por_compliance?: boolean
+          proposito_de_uso?: string | null
+          validade_uso?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          codigo_solicitacao?: string
+          titulo?: string
+          descricao?: string
+          status?:
+            | "pendente"
+            | "em_curadoria"
+            | "em_desenvolvimento"
+            | "concluida"
+            | "cancelada"
+            | "duplicada"
+          prioridade?: "baixa" | "normal" | "alta" | "urgente"
+          categoria?: string[]
+          origem_canal?: string
+          criado_em?: string
+          estimativa_entrega?: string | null
+          entregue_em?: string | null
+          cancelado_em?: string | null
+          solicitante_id?: string
+          equipe_solicitante?: string | null
+          justificativa_negocio?: string | null
+          objetivo_estrategico?:
+            | "aumento_de_conversao"
+            | "reduzir_churn"
+            | "automatizacao"
+            | "eficiencia_operacional"
+            | "novo_produto"
+            | null
+          relevancia_financeira?: string | null
+          impacto_estimado?: "baixo" | "medio" | "alto" | "estrategico" | null
+          responsavel_tecnico_id?: string | null
+          curador_id?: string | null
+          status_curadoria?:
+            | "aguardando"
+            | "em_curadoria"
+            | "validado"
+            | "reprovado"
+            | "reencaminhado"
+          votos_endosso?: number
+          usuarios_endosso?: string[]
+          pipeline_reutilizado?: string | null
+          nova_tabela_gerada?: string | null
+          dashboards_relacionados?: string[]
+          documentacao_gerada?: string | null
+          feedback_efetividade?:
+            | "excelente"
+            | "bom"
+            | "mediano"
+            | "incompleto"
+            | null
+          proximo_passo_sugerido?: string | null
+          classificacao_dado?:
+            | "nao_sensivel"
+            | "PII"
+            | "financeiro"
+            | "confidencial"
+          revisado_por_compliance?: boolean
+          proposito_de_uso?: string | null
+          validade_uso?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      request_comments: {
+        Row: {
+          id: string
+          request_id: string
+          user_id: string
+          comentario: string
+          criado_em: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          request_id: string
+          user_id: string
+          comentario: string
+          criado_em?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          request_id?: string
+          user_id?: string
+          comentario?: string
+          criado_em?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -59,7 +274,7 @@ export type Database = {
 
 type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "api">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
@@ -175,7 +390,7 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  public: {
+  api: {
     Enums: {
       curation_status: [
         "aguardando",
