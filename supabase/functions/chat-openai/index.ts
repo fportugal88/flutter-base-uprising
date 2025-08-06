@@ -1,12 +1,47 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.53.0';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, accept-profile',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Max-Age': '86400',
-};
+// Remove sensitive information from logs
+function sanitizeLog(input: unknown) {
+  if (typeof input === 'string') {
+    return input.replace(/[A-Za-z0-9-_]{16,}/g, '[REDACTED]');
+  }
+  if (input && typeof input === 'object') {
+    try {
+      const clone = JSON.parse(JSON.stringify(input));
+      const sensitive = ['authorization', 'apikey', 'apiKey', 'key', 'secret', 'password', 'token'];
+      for (const k of Object.keys(clone)) {
+        if (sensitive.includes(k.toLowerCase())) {
+          clone[k] = '[REDACTED]';
+        }
+      }
+      return clone;
+    } catch {
+      return input;
+    }
+  }
+  return input;
+}
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('Origin') || '';
+  const allowedOrigins = Deno.env.get('ALLOWED_ORIGINS')
+    ?.split(',')
+    .map((o) => o.trim());
+  const isAllowed = !allowedOrigins || allowedOrigins.includes(origin);
+
+  const headers: Record<string, string> = {
+    'Access-Control-Allow-Origin': isAllowed ? origin : 'null',
+    'Access-Control-Allow-Headers':
+      'authorization, x-client-info, apikey, content-type, accept-profile',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Max-Age': '86400',
+  };
+
+  return { headers, origin, isAllowed };
+}
+
+// TODO: evaluate implementing rate limiting or stricter authentication
 
 interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
@@ -20,12 +55,23 @@ interface ChatRequest {
 }
 
 serve(async (req) => {
+  const { headers: corsHeaders, isAllowed } = getCorsHeaders(req);
   console.log('chat-openai function called:', req.method, req.url);
-  
+
+  if (!isAllowed) {
+    return new Response(
+      JSON.stringify({ error: 'Origin not allowed' }),
+      {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
+    );
+  }
+
   if (req.method === 'OPTIONS') {
-    return new Response(null, { 
+    return new Response(null, {
       status: 200,
-      headers: corsHeaders 
+      headers: corsHeaders
     });
   }
 
@@ -52,7 +98,7 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     
     if (userError || !user) {
-      console.error('Invalid user token:', userError);
+      console.error('Invalid user token:', sanitizeLog(userError));
       return new Response(
         JSON.stringify({ error: 'Invalid authentication' }),
         { 
@@ -121,7 +167,7 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error:', response.status, errorText);
+      console.error('OpenAI API error:', response.status, sanitizeLog(errorText));
       return new Response(
         JSON.stringify({ 
           error: 'Failed to get response from OpenAI',
@@ -142,7 +188,7 @@ serve(async (req) => {
       data?.output?.[0]?.content?.[0]?.text?.trim();
 
     if (!content) {
-      console.error('OpenAI response missing text content', data);
+      console.error('OpenAI response missing text content', sanitizeLog(data));
       return new Response(
         JSON.stringify({ error: 'No text content in OpenAI response' }),
         {
@@ -164,7 +210,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error in chat-openai function:', error);
+    console.error('Error in chat-openai function:', sanitizeLog(error));
     return new Response(
       JSON.stringify({ 
         error: 'Internal server error',

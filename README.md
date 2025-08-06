@@ -60,6 +60,17 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto com as variáveis abaixo:
+
+```sh
+VITE_SUPABASE_URL=<url-do-seu-projeto-supabase>
+VITE_SUPABASE_ANON_KEY=<chave-anon-publica>
+```
+
+O arquivo `.env` já está listado no `.gitignore`, garantindo que essas chaves não sejam commitadas.
+
 ## Assistant Configuration
 
 O comportamento do assistente é definido através de um Assistente criado no
@@ -81,6 +92,20 @@ assistente ainda, um novo será criado usando o modelo informado (padrão
 No aplicativo, o identificador do assistente é recuperado dinamicamente através
 da function `get-assistant-discovery`, portanto nenhuma variável de ambiente é
 necessária para isso.
+
+## Segurança
+
+A function `chat-openai` agora limita o acesso CORS aos domínios definidos na
+variável de ambiente `ALLOWED_ORIGINS` (lista separada por vírgulas). Os logs da
+function são sanitizados para evitar o registro de dados sensíveis.
+
+```sh
+# Exemplo
+ALLOWED_ORIGINS=https://exemplo.com,https://app.exemplo.com
+```
+
+> **Nota:** avalie implementar mecanismos adicionais de rate limiting ou uma
+> autenticação mais estrita conforme necessário para o seu ambiente.
 
 ## How can I deploy this project?
 

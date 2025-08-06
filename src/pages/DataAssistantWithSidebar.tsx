@@ -1,14 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { MessageCircle, Send, ArrowLeft } from "lucide-react";
+import { MessageCircle, ArrowLeft } from "lucide-react";
+import { MessageList } from "@/components/chat/MessageList";
+import { ChatInput } from "@/components/chat/ChatInput";
 import { ChatSidebar } from "@/components/layout/ChatSidebar";
 import { useChat } from "@/contexts/ChatContext";
 import { sendChatMessage } from "@/lib/llm";
+import { logError } from "@/lib/logger";
 import type { Message as ChatMessage } from "@/contexts/ChatContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 
@@ -61,7 +61,12 @@ const DataAssistantWithSidebar = () => {
   };
 
   const handleNewChat = async () => {
-    const sessionId = createNewSession('Nova descoberta');
+    try {
+      await createNewSession('Nova descoberta');
+    } catch (e) {
+      console.error('Erro ao criar sessão:', e);
+      return;
+    }
 
     try {
       const response = await sendChatMessage([
@@ -75,7 +80,7 @@ const DataAssistantWithSidebar = () => {
         });
       });
     } catch (e) {
-      console.error('Erro ao chamar OpenAI:', e);
+      logError('Erro ao chamar OpenAI:', e);
       simulateTyping(() => {
         addMessage({
           type: 'assistant',
@@ -124,18 +129,12 @@ const DataAssistantWithSidebar = () => {
         content: aiResponse
       });
     } catch (e) {
-      console.error('Erro ao chamar OpenAI:', e);
+      logError('Erro ao chamar OpenAI:', e);
       setIsTyping(false);
       addMessage({
         type: 'assistant',
         content: 'Desculpe, ocorreu um erro ao processar sua mensagem. Tente novamente em alguns instantes.'
       });
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSendMessage();
     }
   };
 
@@ -247,76 +246,20 @@ const DataAssistantWithSidebar = () => {
           <div className="flex-1 flex flex-col">
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {currentSession.messages.map((message) => (
-            <div key={message.id} className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] ${message.type === 'user' ? 'order-2' : 'order-1'}`}>
-                <Card className={`${
-                  message.type === 'user' 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'bg-card border-border'
-                }`}>
-                  <CardContent className="p-3">
-                    {message.type === 'assistant' ? (
-                      <div className="prose prose-sm max-w-none dark:prose-invert">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {message.content}
-                        </ReactMarkdown>
-                      </div>
-                    ) : (
-                      <p className="text-body-medium whitespace-pre-line">{message.content}</p>
-                    )}
-                  </CardContent>
-                </Card>
-                
-                <p className="text-xs text-muted-foreground mt-1 px-3">
-                  {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </p>
-              </div>
-            </div>
-          ))}
-
-          {/* Typing Indicator */}
-          {isTyping && (
-            <div className="flex justify-start">
-              <Card className="bg-card border-border">
-                <CardContent className="p-3">
-                  <div className="flex items-center space-x-1">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"></div>
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          <div ref={messagesEndRef} />
-        </div>
+        <MessageList
+          messages={currentSession.messages}
+          isTyping={isTyping}
+          endRef={messagesEndRef}
+        />
 
         {/* Input Area */}
-        <div className="p-4 border-t bg-card">
-          <div className="flex items-center space-x-2">
-            <Input
-              ref={inputRef}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Digite sua mensagem..."
-              className="flex-1"
-              disabled={isTyping}
-            />
-            <Button 
-              onClick={handleSendMessage}
-              size="icon"
-              disabled={!inputValue.trim() || isTyping}
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
-            </div>
+        <ChatInput
+          inputRef={inputRef}
+          value={inputValue}
+          onChange={setInputValue}
+          onSend={handleSendMessage}
+          disabled={isTyping}
+        />
           </div>
         </div>
       </div>
