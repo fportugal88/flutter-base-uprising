@@ -285,7 +285,7 @@ export const useRequestComments = (requestId: string) => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -303,7 +303,7 @@ export const useRequestComments = (requestId: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [requestId]);
 
   const addComment = async (comentario: string) => {
     if (!user) return null;
@@ -338,7 +338,7 @@ export const useRequestComments = (requestId: string) => {
     if (requestId) {
       fetchComments();
     }
-  }, [requestId]);
+  }, [requestId, fetchComments]);
 
   return {
     comments,
