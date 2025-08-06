@@ -19,8 +19,7 @@ export async function sendChatMessage(
     log('sendChatMessage: invoking chat-openai function...');
 
     const { data, error } = await supabase.functions.invoke('chat-openai', {
-      body: { messages },
-      signal: controller.signal
+      body: { messages }
     });
 
     if (error) {
