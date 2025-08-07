@@ -10,8 +10,7 @@ import { useChat } from "@/contexts/ChatContext";
 import { logError } from "@/lib/logger";
 import type { Message as ChatMessage } from "@/contexts/ChatContext";
 import { AppLayout } from "@/components/layout/AppLayout";
-
-
+import { supabase } from "@/integrations/supabase/client";
 
 const DataAssistantWithSidebar = () => {
   const navigate = useNavigate();
@@ -60,6 +59,7 @@ const DataAssistantWithSidebar = () => {
   };
 
   const handleNewChat = async () => {
+    console.log("teste 1 ")
     try {
       await createNewSession('Nova descoberta');
       
@@ -76,32 +76,55 @@ const DataAssistantWithSidebar = () => {
   };
 
   const handleStartConversation = () => {
+    console.log("teste")
     if (!currentSession) {
       handleNewChat();
     }
   };
 
 
-
+  const [threadId, setThreadId] = useState<string | null>(null);
+  
   const handleSendMessage = async () => {
     if (!inputValue.trim() || !currentSession) return;
 
-    const message = inputValue.trim();
+    const userMessage = inputValue.trim();
     setInputValue('');
+    addMessage({ type: 'user', content: userMessage });
 
-    // Salva mensagem do usuário
-    addMessage({
-      type: 'user',
-      content: message
-    });
+    try {
+      setIsTyping(true);
 
-    // Simula resposta do assistente
-    simulateTyping(() => {
+      const { data, error } = await supabase.functions.invoke('send-message', {
+        body: {
+          message: userMessage,
+          threadId: threadId, // pode ser null
+        },
+      });
+
+      if (error) {
+        console.error("Erro da função:", error);
+        addMessage({
+          type: 'assistant',
+          content: 'Erro ao processar sua mensagem com a IA.',
+        });
+      } else {
+        setThreadId(data.threadId);
+        addMessage({
+          type: 'assistant',
+          content: data.reply,
+        });
+      }
+
+    } catch (err) {
+      console.error("Erro ao chamar função:", err);
       addMessage({
         type: 'assistant',
-        content: 'Mensagem recebida e salva no banco! Em breve conectaremos com IA.'
+        content: 'Erro ao conectar com a IA.',
       });
-    });
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   // Show welcome screen if no session
@@ -148,26 +171,6 @@ const DataAssistantWithSidebar = () => {
                   Transforme perguntas em respostas. Solicite, explore e ganhe tempo com dados inteligentes.
                 </p>
               </div>
-
-              {/* Chat Ready Indicator */}
-              <div className="mb-6 w-full max-w-2xl">
-                <Card className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
-                  <CardContent className="p-4 text-center">
-                    <p className="text-sm text-green-700 dark:text-green-300">
-                      Sistema de chat configurado e pronto para uso
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <Button 
-                onClick={handleStartConversation}
-                size="lg"
-                className="w-full max-w-xs h-12 text-base"
-              >
-                <MessageCircle className="mr-2 h-5 w-5" />
-                Iniciar Conversa
-              </Button>
             </div>
           </div>
         </div>
