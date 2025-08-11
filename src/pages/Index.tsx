@@ -14,10 +14,7 @@ const Index = () => {
   const navigate = useNavigate();
   const pendingApprovalsCount = React.useMemo(() => {
     if (!Array.isArray(requests)) return 0;
-    const hasCuradoria = requests.some((r: any) => typeof r?.status_curadoria !== 'undefined');
-    return hasCuradoria
-      ? requests.filter((r: any) => r.status_curadoria === 'aguardando').length
-      : requests.filter((r: any) => r.status === 'pendente').length;
+    return requests.filter((r: any) => (r?.status ?? '').toLowerCase() === 'pendente').length;
   }, [requests]);
 
   const getUserName = () => {
