@@ -246,11 +246,11 @@ const MyRequests = () => {
                          ))}
                        </div>
                       
-                      <div className="flex gap-2 flex-wrap w-full sm:w-auto">
-                        <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
-                          <Eye className="h-4 w-4 mr-1" />
-                          <span className="hidden sm:inline">Detalhes</span>
-                        </Button>
+                        <div className="flex gap-2 flex-wrap w-full sm:w-auto">
+                          <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => navigate(`/my-requests/${request.id}`)}>
+                            <Eye className="h-4 w-4 mr-1" />
+                            <span className="hidden sm:inline">Detalhes</span>
+                          </Button>
                         
                          {request.status === 'concluida' && (
                            <Button size="sm" className="flex-1 sm:flex-none">
