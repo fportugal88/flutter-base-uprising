@@ -61,11 +61,11 @@ const DataAssistantWithSidebar = () => {
   const handleNewChat = async () => {
     console.log("teste 1 ")
     try {
-      await createNewSession('Nova descoberta');
+      const newId = await createNewSession('Nova descoberta');
       
-      // Adiciona mensagem de boas-vindas do assistente
+      // Adiciona mensagem de boas-vindas do assistente usando a sessão correta
       simulateTyping(() => {
-        addMessage({
+        addMessageToSession(newId, {
           type: 'assistant',
           content: 'Olá! Sou seu assistente de IA. Como posso ajudá-lo hoje?'
         });
@@ -88,9 +88,10 @@ const DataAssistantWithSidebar = () => {
   const handleSendMessage = async () => {
     if (!inputValue.trim() || !currentSession) return;
 
+    const sessionIdForThisTurn = currentSession.id; // captura a sessão ativa no início
     const userMessage = inputValue.trim();
     setInputValue('');
-    addMessage({ type: 'user', content: userMessage });
+    await addMessageToSession(sessionIdForThisTurn, { type: 'user', content: userMessage });
 
     try {
       setIsTyping(true);
@@ -104,13 +105,13 @@ const DataAssistantWithSidebar = () => {
 
       if (error) {
         console.error("Erro da função:", error);
-        addMessage({
+        await addMessageToSession(sessionIdForThisTurn, {
           type: 'assistant',
           content: 'Erro ao processar sua mensagem com a IA.',
         });
       } else {
         setThreadId(data.threadId);
-        addMessage({
+        await addMessageToSession(sessionIdForThisTurn, {
           type: 'assistant',
           content: data.reply,
         });
@@ -118,7 +119,7 @@ const DataAssistantWithSidebar = () => {
 
     } catch (err) {
       console.error("Erro ao chamar função:", err);
-      addMessage({
+      await addMessageToSession(sessionIdForThisTurn, {
         type: 'assistant',
         content: 'Erro ao conectar com a IA.',
       });

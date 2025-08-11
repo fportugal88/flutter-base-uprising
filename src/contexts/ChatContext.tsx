@@ -170,6 +170,17 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   };
 
   const addMessageToSession = async (sessionId: string, message: Omit<Message, 'id' | 'timestamp'>): Promise<void> => {
+    // Validate target session exists locally to avoid saving with an invalid ID
+    const target = sessions.find(s => s.id === sessionId);
+    if (!target) {
+      console.error('addMessageToSession: sessão não encontrada para o ID:', sessionId);
+      toast({
+        title: 'Sessão inválida',
+        description: 'Não foi possível encontrar a sessão selecionada. Tente novamente.'
+      });
+    
+      throw new Error('Invalid sessionId');
+    }
     const timestamp = new Date();
     const newMessage: Message = {
       ...message,
