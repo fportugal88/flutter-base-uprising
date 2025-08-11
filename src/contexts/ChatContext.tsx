@@ -96,9 +96,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     if (user) {
       try {
         const { error } = await (supabase.from('chat_sessions' as any) as any).insert({
+          id,
           user_id: user.id,
           title: newSession.title,
-          status: 'active'
+          status: 'active',
+          last_message_at: createdAt.toISOString()
         });
         if (error) throw error;
         console.log('Session created successfully:', id);
