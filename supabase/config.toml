@@ -1,1 +1,6 @@
 project_id = "bqkmmyjqcazjldicxddn"
+
+[functions.send-message]
+# Keep the default JWT verification (requires authenticated calls)
+# Set to false only if you want it public
+verify_jwt = true
