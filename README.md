@@ -109,7 +109,14 @@ ALLOWED_ORIGINS=https://exemplo.com,https://app.exemplo.com
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/ee506ff2-f35d-4130-9ddb-fd3727716c89) and click on Share -> Publish.
+This repository includes a GitHub Actions workflow that builds the project and publishes the `dist` directory to GitHub Pages. On each push to the `main` branch:
+
+1. GitHub installs dependencies and runs `npm run build`.
+2. The generated `dist` folder is uploaded and deployed to GitHub Pages.
+
+To use it, make sure the repository has the secrets `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` configured with your Supabase credentials.
+
+You can still deploy via [Lovable](https://lovable.dev/projects/ee506ff2-f35d-4130-9ddb-fd3727716c89) by clicking **Share → Publish** if you prefer.
 
 ## Can I connect a custom domain to my Lovable project?
 
